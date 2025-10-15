@@ -30,7 +30,7 @@
                 background-color: white;
             }
 
-            #header-buttons, #auth-container, .border-b, footer, .remove-week-culto-btn, .add-culto-btn, #add-culto-modal, #remove-culto-modal, #tab-saved {
+            #header-buttons, #auth-container, .border-b, footer, .remove-week-culto-btn, .add-culto-btn, #add-culto-modal, #remove-culto-modal, #tab-saved, #password-confirm-modal {
                 display: none !important;
             }
 
@@ -224,6 +224,25 @@
         </div>
     </div>
     
+    <!-- Modal de Confirmação de Senha -->
+    <div id="password-confirm-modal" class="fixed inset-0 bg-black bg-opacity-60 hidden items-center justify-center z-50">
+        <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-sm mx-4">
+            <h3 class="text-xl font-bold mb-4">Confirmar Ação</h3>
+            <p class="text-gray-600 mb-4">Para continuar, por favor, digite a senha de acesso.</p>
+            <div id="password-confirm-error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg relative mb-4 hidden" role="alert">
+                <span>Senha incorreta.</span>
+            </div>
+            <div class="mb-6">
+                <label for="confirm-password-input" class="block text-sm font-medium text-gray-700 mb-1">Senha</label>
+                <input type="password" id="confirm-password-input" class="w-full p-2 border border-gray-300 rounded-lg shadow-sm">
+            </div>
+            <div class="flex justify-end gap-4">
+                <button id="cancel-password-confirm" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400">Cancelar</button>
+                <button id="confirm-password-action" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -278,9 +297,15 @@
             const yearInput = document.getElementById('year-input');
             const scheduleBody = document.getElementById('schedule-body');
             const textWidthHelper = document.getElementById('text-width-helper');
+            const passwordConfirmModal = document.getElementById('password-confirm-modal');
+            const cancelPasswordConfirmBtn = document.getElementById('cancel-password-confirm');
+            const confirmPasswordActionBtn = document.getElementById('confirm-password-action');
+            const confirmPasswordInput = document.getElementById('confirm-password-input');
+            const passwordConfirmError = document.getElementById('password-confirm-error');
 
             // --- ESTADO DA APLICAÇÃO ---
             let isLoggedIn = false;
+            let onPasswordConfirm = null;
 
             // --- CONSTANTES ---
             const months = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
@@ -497,9 +522,7 @@
             }
 
             async function deleteSchedule(docId) {
-                const password = prompt("Para confirmar a exclusão, por favor, digite a senha de acesso:");
-                if (password === null) return;
-                if (password === '3458') {
+                const performDeletion = async () => {
                     if (confirm("Tem certeza que deseja excluir esta escala permanentemente?")) {
                         try {
                             await deleteDoc(doc(schedulesCollection, docId));
@@ -510,9 +533,8 @@
                             alert("Erro ao excluir a escala."); 
                         }
                     }
-                } else {
-                    alert("Senha incorreta. A exclusão foi cancelada.");
-                }
+                };
+                requestPasswordConfirmation(performDeletion);
             }
             
             // --- LÓGICA DOS MODAIS E AUTO-AJUSTE ---
@@ -524,6 +546,13 @@
                 element.style.width = `${textWidthHelper.scrollWidth + 10}px`;
             }
 
+            function requestPasswordConfirmation(callback) {
+                onPasswordConfirm = callback;
+                confirmPasswordInput.value = '';
+                passwordConfirmError.classList.add('hidden');
+                passwordConfirmModal.style.display = 'flex';
+            }
+
             const addCultoModal = document.getElementById('add-culto-modal');
             const removeCultoModal = document.getElementById('remove-culto-modal');
             let currentWeekForModal = null;
@@ -531,19 +560,20 @@
                 document.getElementById('cancel-add-culto').addEventListener('click', () => { addCultoModal.style.display = 'none'; });
                 document.getElementById('cancel-remove-culto').addEventListener('click', () => { removeCultoModal.style.display = 'none'; });
                 document.getElementById('confirm-remove-culto').addEventListener('click', () => {
-                    const password = prompt("Para confirmar a remoção, por favor, digite a senha de acesso:");
-                    if (password === null) return;
-
-                    if (password === '3458') {
+                     const performRemoval = () => {
                         removeCultoModal.querySelectorAll('input:checked').forEach(cb => {
                             const row = scheduleBody.querySelector(`tr[data-row-id="${cb.value}"]`);
                             if (row) row.remove();
                         });
                         alert("Culto(s) removido(s) com sucesso.");
+                        removeCultoModal.style.display = 'none';
+                    };
+
+                    if (removeCultoModal.querySelectorAll('input:checked').length > 0) {
+                        requestPasswordConfirmation(performRemoval);
                     } else {
-                        alert("Senha incorreta. A remoção foi cancelada.");
+                        removeCultoModal.style.display = 'none';
                     }
-                    removeCultoModal.style.display = 'none';
                 });
                 document.getElementById('confirm-add-culto').addEventListener('click', () => {
                     const newDate = document.getElementById('new-culto-date').value;
@@ -569,6 +599,24 @@
                     });
                     
                     addCultoModal.style.display = 'none';
+                });
+
+                cancelPasswordConfirmBtn.addEventListener('click', () => {
+                    passwordConfirmModal.style.display = 'none';
+                    onPasswordConfirm = null;
+                });
+                
+                confirmPasswordActionBtn.addEventListener('click', () => {
+                    if (confirmPasswordInput.value === '3458') {
+                        if (typeof onPasswordConfirm === 'function') {
+                            onPasswordConfirm();
+                        }
+                        passwordConfirmModal.style.display = 'none';
+                        onPasswordConfirm = null;
+                    } else {
+                        passwordConfirmError.classList.remove('hidden');
+                        confirmPasswordInput.value = '';
+                    }
                 });
             }
 
@@ -730,9 +778,15 @@
                                 if (!optionExists) {
                                     staffNames.push(trimmedName);
                                     staffNames.sort();
-                                    document.querySelectorAll('select[data-role="preleitor"]').forEach(s => {
-                                        const newOption = new Option(trimmedName, trimmedName);
-                                        s.add(newOption, s.options[s.options.length - 1]); // Add before the last option
+                                    document.querySelectorAll('select').forEach(s => {
+                                        if (s.dataset.role === 'preleitor' || s.dataset.role === 'portaria' || s.dataset.role === 'direcao') {
+                                             const newOption = new Option(trimmedName, trimmedName);
+                                             if (s.querySelector('option[value="__outro__"]')) {
+                                                s.add(newOption, s.options[s.options.length - 1]);
+                                             } else {
+                                                s.add(newOption);
+                                             }
+                                        }
                                     });
                                 }
                                 currentSelect.value = trimmedName;
