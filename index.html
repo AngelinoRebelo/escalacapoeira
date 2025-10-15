@@ -16,9 +16,17 @@
             border-bottom: 2px solid #2563EB;
             color: #2563EB;
         }
+        .auto-size-select {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: none;
+        }
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800">
+
+    <span id="text-width-helper" style="position: absolute; visibility: hidden; height: auto; width: auto; white-space: nowrap; font: inherit;"></span>
 
     <!-- Modal de Autenticação -->
     <div id="auth-container" class="fixed inset-0 bg-black bg-opacity-60 flex-col items-center justify-center p-4 z-50 hidden">
@@ -205,6 +213,7 @@
             const monthSelect = document.getElementById('month-select');
             const yearInput = document.getElementById('year-input');
             const scheduleBody = document.getElementById('schedule-body');
+            const textWidthHelper = document.getElementById('text-width-helper');
 
             // --- ESTADO DA APLICAÇÃO ---
             let isLoggedIn = false;
@@ -216,44 +225,38 @@
             const cultos = { 0: "LOUVOR E ADORAÇÃO", 3: "DOUTRINA", 5: "LIBERTAÇÃO" };
             const cultDaysOrder = [3, 5, 0];
             
-            const staffNamesList = [
-                "A DEFINIR", "PR. CARLOS", "DC. SIMONE", "PR. GABRIEL", "PRB. LEANDRO",
-                "Diac.Gladimir", "MISS.VANESSA", "MISS.LUCIA / MISS.ANA / DC.SIMONE", "DC. GLADIMIR",
-                "MISS. KELLY", "OB. JANETE", "MISS.ANA / MISS. LUCIA / DC.SIMONE", "MISS.ANA / MISS. LUCIA",
-                "MISS. LORRANE", "PRESB. GABRIEL", "MISS.ESTER", "PRESB. LEANDRO", "Miss.Vanessa/Obr. Clemilton",
-                "OB. CLEMILTON/MISS. ESTER", "DC.RACHEL E IR. GABRIEL", "MISS.LORRANE / IR. VITORIA",
-                "MISS. KELLY / OB. ANA ROCHA", "MISS. VANESSA / OB. MARCOS", "OB. ANA ROCHA / DC. GLADIMIR",
-                "IR. VITORIA / OB.CLEMILTON", "DC.ROSA / MISS. VANESSA", "MISS.ESTER / OB.CLEMILTON",
-                "IR. VITORIA / IR. GABRIEL", "OB. MARCOS / MISS KELY", "OB. JANETE / DC. GLADIMIR",
-                "MISS. VANESSA / IR. VITORIA", "OB. MARCOS / DC. RACHEL"
-            ];
-            const uniqueStaffNames = [...new Set(staffNamesList)].sort();
+            const staffNames = [
+                "A DEFINIR", "MISS.VANESSA", "MISS.LUCIA", "MISS. KELLY", "MISS.ANA", "MISS.LORRANE", "MISS.ESTER",
+                "DC. GLADIMIR", "DCa.SIMONE", "DCa. RAQUEL", "DCa. ROSA", "OB. CLEMILTON", "OB. MARCOS",
+                "OB. JANETE", "OB. ANA ROCHA", "IR. GABRIEL", "IR. VITÓRIA",
+                "PR. CARLOS", "PR. GABRIEL", "PRB. LEANDRO"
+            ].sort();
 
             const octoberData = [
                 {
-                    3: { portaria: 'Miss.Vanessa/Obr. Clemilton', direcao: 'Diac.Gladimir', preleitor: 'PR. CARLOS' },
-                    5: { portaria: 'OB. CLEMILTON/MISS. ESTER', direcao: 'MISS.LUCIA / MISS.ANA / DC.SIMONE', preleitor: 'DC. SIMONE' },
-                    0: { portaria: 'DC.RACHEL E IR. GABRIEL', direcao: 'MISS.VANESSA', preleitor: 'PR. CARLOS' }
+                    3: { portaria: 'MISS.VANESSA/OB. CLEMILTON', direcao: 'DC. GLADIMIR', preleitor: 'PR. CARLOS' },
+                    5: { portaria: 'OB. CLEMILTON/MISS. ESTER', direcao: 'DCa.SIMONE', preleitor: 'DCa.SIMONE' },
+                    0: { portaria: 'DCa. RAQUEL/IR. GABRIEL', direcao: 'MISS.VANESSA', preleitor: 'PR. CARLOS' }
                 },
                 {
-                    3: { portaria: 'MISS.LORRANE / IR. VITORIA', direcao: 'DC. GLADIMIR', preleitor: 'PR. GABRIEL' },
-                    5: { portaria: 'MISS. KELLY / OB. ANA ROCHA', direcao: 'MISS.LUCIA / MISS.ANA / DC.SIMONE', preleitor: 'A DEFINIR' },
-                    0: { portaria: 'MISS. VANESSA / OB. MARCOS', direcao: 'MISS. KELLY', preleitor: 'PR. GABRIEL' }
+                    3: { portaria: 'MISS.LORRANE/IR. VITÓRIA', direcao: 'DC. GLADIMIR', preleitor: 'PR. GABRIEL' },
+                    5: { portaria: 'MISS. KELLY/OB. ANA ROCHA', direcao: 'DCa.SIMONE', preleitor: 'A DEFINIR' },
+                    0: { portaria: 'MISS. VANESSA/OB. MARCOS', direcao: 'MISS. KELLY', preleitor: 'PR. GABRIEL' }
                 },
                 {
-                    3: { portaria: 'OB. ANA ROCHA / DC. GLADIMIR', direcao: 'OB. JANETE', preleitor: 'PR. CARLOS' },
-                    5: { portaria: 'IR. VITORIA / OB.CLEMILTON', direcao: 'MISS.ANA / MISS. LUCIA / DC.SIMONE', preleitor: 'A DEFINIR' },
-                    0: { portaria: 'DC.ROSA / MISS. VANESSA', direcao: 'MISS.ANA / MISS. LUCIA', preleitor: 'A DEFINIR' }
+                    3: { portaria: 'OB. ANA ROCHA/DC. GLADIMIR', direcao: 'OB. JANETE', preleitor: 'PR. CARLOS' },
+                    5: { portaria: 'IR. VITÓRIA/OB. CLEMILTON', direcao: 'DCa.SIMONE', preleitor: 'A DEFINIR' },
+                    0: { portaria: 'DCa. ROSA/MISS. VANESSA', direcao: 'MISS.ANA', preleitor: 'A DEFINIR' }
                 },
                 {
-                    3: { portaria: 'MISS.ESTER / OB.CLEMILTON', direcao: 'MISS. LORRANE', preleitor: 'PRB. LEANDRO' },
-                    5: { portaria: 'IR. VITORIA / IR. GABRIEL', direcao: 'MISS.LUCIA / MISS.ANA / DC.SIMONE', preleitor: 'A DEFINIR' },
-                    0: { portaria: 'OB. MARCOS / MISS KELY', direcao: 'PRESB. GABRIEL', preleitor: 'A DEFINIR' }
+                    3: { portaria: 'MISS.ESTER/OB. CLEMILTON', direcao: 'MISS. LORRANE', preleitor: 'PRB. LEANDRO' },
+                    5: { portaria: 'IR. VITÓRIA/IR. GABRIEL', direcao: 'DCa.SIMONE', preleitor: 'A DEFINIR' },
+                    0: { portaria: 'OB. MARCOS/MISS. KELLY', direcao: 'PR. GABRIEL', preleitor: 'A DEFINIR' }
                 },
                 {
-                    3: { portaria: 'OB. JANETE / DC. GLADIMIR', direcao: 'MISS.ESTER', preleitor: 'A DEFINIR' },
-                    5: { portaria: 'MISS. VANESSA / IR. VITORIA', direcao: 'MISS.LUCIA / MISS.ANA / DC.SIMONE', preleitor: 'A DEFINIR' },
-                    0: { portaria: 'OB. MARCOS / DC. RACHEL', direcao: 'PRESB. LEANDRO', preleitor: 'A DEFINIR' }
+                    3: { portaria: 'OB. JANETE/DC. GLADIMIR', direcao: 'MISS.ESTER', preleitor: 'A DEFINIR' },
+                    5: { portaria: 'MISS. VANESSA/IR. VITÓRIA', direcao: 'DCa.SIMONE', preleitor: 'A DEFINIR' },
+                    0: { portaria: 'OB. MARCOS/DCa. RAQUEL', direcao: 'PRB. LEANDRO', preleitor: 'A DEFINIR' }
                 }
             ];
 
@@ -293,7 +296,7 @@
             loginForm.addEventListener('submit', (e) => {
                 e.preventDefault();
                 loginError.classList.add('hidden');
-                if (document.getElementById('username').value === 'cgescala' && document.getElementById('password').value === '1234') {
+                if (document.getElementById('username').value === 'cgcapoeira' && document.getElementById('password').value === '3458') {
                     sessionStorage.setItem('escala_loggedin', 'true');
                     authContainer.classList.add('hidden');
                     authContainer.classList.remove('flex');
@@ -342,11 +345,14 @@
                 scheduleBody.querySelectorAll('tr[data-row-id]').forEach(row => {
                     const weekIndex = parseInt(row.dataset.weekIndex);
                     const cells = row.querySelectorAll('td');
+                    const portariaSelects = cells[3].querySelectorAll('select');
+                    const portariaValue = `${portariaSelects[0].value} / ${portariaSelects[1].value}`;
+
                     const service = {
                         date: cells[0].querySelector('input').value,
                         day: cells[1].textContent,
                         type: cells[2].textContent,
-                        portaria: cells[3].querySelector('select').value,
+                        portaria: portariaValue,
                         direcao: cells[4].querySelector('select').value,
                         preleitor: cells[5].querySelector('select').value
                     };
@@ -410,7 +416,15 @@
                 }
             }
             
-            // --- LÓGICA DOS MODAIS ---
+            // --- LÓGICA DOS MODAIS E AUTO-AJUSTE ---
+            function autoSizeSelect(element) {
+                if (!element) return;
+                const selectedOption = element.options[element.selectedIndex];
+                textWidthHelper.style.font = window.getComputedStyle(element).font;
+                textWidthHelper.textContent = selectedOption.text;
+                element.style.width = `${textWidthHelper.scrollWidth + 10}px`;
+            }
+
             const addCultoModal = document.getElementById('add-culto-modal');
             const removeCultoModal = document.getElementById('remove-culto-modal');
             let currentWeekForModal = null;
@@ -434,7 +448,7 @@
                         date: newDate,
                         day: dayNames[dateObj.getDay()].toUpperCase(),
                         type: document.getElementById('new-culto-type').value,
-                        portaria: 'A definir', direcao: 'A definir', preleitor: 'A definir'
+                        portaria: 'A DEFINIR', direcao: 'A DEFINIR', preleitor: 'A DEFINIR'
                     };
                     
                     const disabledState = isLoggedIn ? '' : 'disabled';
@@ -442,6 +456,11 @@
                     let lastRowInWeek = scheduleBody.querySelector(`tr[data-week-num="${currentWeekForModal}"]`);
                     scheduleBody.querySelectorAll(`tr[data-week-index="${currentWeekForModal}"]`).forEach(r => lastRowInWeek = r);
                     lastRowInWeek.insertAdjacentElement('afterend', newRow);
+
+                    newRow.querySelectorAll('select.auto-size-select').forEach(select => {
+                        autoSizeSelect(select);
+                        select.addEventListener('change', () => autoSizeSelect(select));
+                    });
                     
                     addCultoModal.style.display = 'none';
                 });
@@ -458,7 +477,7 @@
                 const createSelectForRole = (names, selectedValue, classes = '') => {
                     let optionsHtml = '';
                     const nameSet = new Set(names);
-                    if (!nameSet.has(selectedValue)) {
+                    if (selectedValue && !nameSet.has(selectedValue)) {
                         nameSet.add(selectedValue);
                     }
                     const sortedNames = [...nameSet].sort();
@@ -466,16 +485,23 @@
                     for (const name of sortedNames) {
                         optionsHtml += `<option value="${name}" ${name === selectedValue ? 'selected' : ''}>${name}</option>`;
                     }
-                    return `<select class="p-1 border rounded w-full text-center ${classes}" ${disabledState}>${optionsHtml}</select>`;
+                    return `<select class="p-1 border rounded w-full text-center auto-size-select ${classes}" ${disabledState}>${optionsHtml}</select>`;
                 };
+                
+                const portariaParts = service.portaria.includes('/') 
+                    ? service.portaria.split('/').map(s => s.trim()) 
+                    : [service.portaria.trim(), 'A DEFINIR'];
                  
                  row.innerHTML = `
                     <td class="p-3"><input type="date" class="p-1 border rounded w-full date-input" value="${service.date}" data-row-id="${rowId}" ${disabledState}></td>
                     <td id="day-cell-${rowId}" class="p-3">${service.day}</td>
                     <td class="p-3 font-semibold text-blue-700">${service.type}</td>
-                    <td class="p-2">${createSelectForRole(uniqueStaffNames, service.portaria)}</td>
-                    <td class="p-2">${createSelectForRole(uniqueStaffNames, service.direcao)}</td>
-                    <td class="p-2">${createSelectForRole(uniqueStaffNames, service.preleitor, 'font-semibold')}</td>`;
+                    <td class="p-2 flex flex-col gap-1 items-center justify-center">
+                        ${createSelectForRole(staffNames, portariaParts[0])}
+                        ${createSelectForRole(staffNames, portariaParts[1])}
+                    </td>
+                    <td class="p-2">${createSelectForRole(staffNames, service.direcao)}</td>
+                    <td class="p-2">${createSelectForRole(staffNames, service.preleitor, 'font-semibold')}</td>`;
                  return row;
             }
 
@@ -522,7 +548,7 @@
                                 let serviceData = {
                                     date: date.toISOString().split('T')[0],
                                     day: dayNames[dayOfWeek].toUpperCase(), type,
-                                    portaria: 'A definir', direcao: 'A definir', preleitor: 'A definir'
+                                    portaria: 'A DEFINIR', direcao: 'A DEFINIR', preleitor: 'A DEFINIR'
                                 };
                                 
                                 if (month === 9 && octoberData[weekIndex] && octoberData[weekIndex][dayOfWeek]) {
@@ -566,6 +592,10 @@
                     }
                     removeCultoModal.style.display = 'flex';
                 }));
+                document.querySelectorAll('select.auto-size-select').forEach(select => {
+                    autoSizeSelect(select);
+                    select.addEventListener('change', () => autoSizeSelect(select));
+                });
             }
 
             // --- INICIALIZAÇÃO DA PÁGINA ---
