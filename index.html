@@ -166,19 +166,16 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const appId = firebaseConfig.appId;
         let userId = null;
         let schedulesCollection;
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 userId = user.uid;
-                // CORREÇÃO: Usando o caminho correto da coleção para o Firestore
-                schedulesCollection = collection(db, `/artifacts/${appId}/public/data/schedules`);
+                schedulesCollection = collection(db, 'schedules');
             }
         });
         
-        // CORREÇÃO: Restaurando a lógica de autenticação robusta
         async function authenticate() {
             try {
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
@@ -188,7 +185,6 @@
                 }
             } catch(error) {
                 console.error("Authentication failed:", error);
-                // Opcional: Mostrar uma mensagem de erro para o usuário
             }
         }
         authenticate();
@@ -219,6 +215,48 @@
             const dayNames = ["Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"];
             const cultos = { 0: "LOUVOR E ADORAÇÃO", 3: "DOUTRINA", 5: "LIBERTAÇÃO" };
             const cultDaysOrder = [3, 5, 0];
+            
+            const staffNamesList = [
+                "A DEFINIR", "PR. CARLOS", "DC. SIMONE", "PR. GABRIEL", "PRB. LEANDRO",
+                "Diac.Gladimir", "MISS.VANESSA", "MISS.LUCIA / MISS.ANA / DC.SIMONE", "DC. GLADIMIR",
+                "MISS. KELLY", "OB. JANETE", "MISS.ANA / MISS. LUCIA / DC.SIMONE", "MISS.ANA / MISS. LUCIA",
+                "MISS. LORRANE", "PRESB. GABRIEL", "MISS.ESTER", "PRESB. LEANDRO", "Miss.Vanessa/Obr. Clemilton",
+                "OB. CLEMILTON/MISS. ESTER", "DC.RACHEL E IR. GABRIEL", "MISS.LORRANE / IR. VITORIA",
+                "MISS. KELLY / OB. ANA ROCHA", "MISS. VANESSA / OB. MARCOS", "OB. ANA ROCHA / DC. GLADIMIR",
+                "IR. VITORIA / OB.CLEMILTON", "DC.ROSA / MISS. VANESSA", "MISS.ESTER / OB.CLEMILTON",
+                "IR. VITORIA / IR. GABRIEL", "OB. MARCOS / MISS KELY", "OB. JANETE / DC. GLADIMIR",
+                "MISS. VANESSA / IR. VITORIA", "OB. MARCOS / DC. RACHEL"
+            ];
+            const uniqueStaffNames = [...new Set(staffNamesList)].sort();
+
+            const octoberData = [
+                {
+                    3: { portaria: 'Miss.Vanessa/Obr. Clemilton', direcao: 'Diac.Gladimir', preleitor: 'PR. CARLOS' },
+                    5: { portaria: 'OB. CLEMILTON/MISS. ESTER', direcao: 'MISS.LUCIA / MISS.ANA / DC.SIMONE', preleitor: 'DC. SIMONE' },
+                    0: { portaria: 'DC.RACHEL E IR. GABRIEL', direcao: 'MISS.VANESSA', preleitor: 'PR. CARLOS' }
+                },
+                {
+                    3: { portaria: 'MISS.LORRANE / IR. VITORIA', direcao: 'DC. GLADIMIR', preleitor: 'PR. GABRIEL' },
+                    5: { portaria: 'MISS. KELLY / OB. ANA ROCHA', direcao: 'MISS.LUCIA / MISS.ANA / DC.SIMONE', preleitor: 'A DEFINIR' },
+                    0: { portaria: 'MISS. VANESSA / OB. MARCOS', direcao: 'MISS. KELLY', preleitor: 'PR. GABRIEL' }
+                },
+                {
+                    3: { portaria: 'OB. ANA ROCHA / DC. GLADIMIR', direcao: 'OB. JANETE', preleitor: 'PR. CARLOS' },
+                    5: { portaria: 'IR. VITORIA / OB.CLEMILTON', direcao: 'MISS.ANA / MISS. LUCIA / DC.SIMONE', preleitor: 'A DEFINIR' },
+                    0: { portaria: 'DC.ROSA / MISS. VANESSA', direcao: 'MISS.ANA / MISS. LUCIA', preleitor: 'A DEFINIR' }
+                },
+                {
+                    3: { portaria: 'MISS.ESTER / OB.CLEMILTON', direcao: 'MISS. LORRANE', preleitor: 'PRB. LEANDRO' },
+                    5: { portaria: 'IR. VITORIA / IR. GABRIEL', direcao: 'MISS.LUCIA / MISS.ANA / DC.SIMONE', preleitor: 'A DEFINIR' },
+                    0: { portaria: 'OB. MARCOS / MISS KELY', direcao: 'PRESB. GABRIEL', preleitor: 'A DEFINIR' }
+                },
+                {
+                    3: { portaria: 'OB. JANETE / DC. GLADIMIR', direcao: 'MISS.ESTER', preleitor: 'A DEFINIR' },
+                    5: { portaria: 'MISS. VANESSA / IR. VITORIA', direcao: 'MISS.LUCIA / MISS.ANA / DC.SIMONE', preleitor: 'A DEFINIR' },
+                    0: { portaria: 'OB. MARCOS / DC. RACHEL', direcao: 'PRESB. LEANDRO', preleitor: 'A DEFINIR' }
+                }
+            ];
+
 
             // --- LÓGICA DE AUTENTICAÇÃO ---
             const checkAuth = () => {
@@ -308,9 +346,9 @@
                         date: cells[0].querySelector('input').value,
                         day: cells[1].textContent,
                         type: cells[2].textContent,
-                        portaria: cells[3].querySelector('input').value,
-                        direcao: cells[4].querySelector('input').value,
-                        preleitor: cells[5].querySelector('input').value
+                        portaria: cells[3].querySelector('select').value,
+                        direcao: cells[4].querySelector('select').value,
+                        preleitor: cells[5].querySelector('select').value
                     };
                     if (scheduleData.weeks[weekIndex]) {
                         scheduleData.weeks[weekIndex].services.push(service);
@@ -372,7 +410,7 @@
                 }
             }
             
-            // --- LÓGICA DOS MODAIS (Adicionar/Remover Culto) ---
+            // --- LÓGICA DOS MODAIS ---
             const addCultoModal = document.getElementById('add-culto-modal');
             const removeCultoModal = document.getElementById('remove-culto-modal');
             let currentWeekForModal = null;
@@ -398,8 +436,9 @@
                         type: document.getElementById('new-culto-type').value,
                         portaria: 'A definir', direcao: 'A definir', preleitor: 'A definir'
                     };
-
-                    const newRow = createServiceRow(currentWeekForModal, serviceData);
+                    
+                    const disabledState = isLoggedIn ? '' : 'disabled';
+                    const newRow = createServiceRow(currentWeekForModal, serviceData, disabledState);
                     let lastRowInWeek = scheduleBody.querySelector(`tr[data-week-num="${currentWeekForModal}"]`);
                     scheduleBody.querySelectorAll(`tr[data-week-index="${currentWeekForModal}"]`).forEach(r => lastRowInWeek = r);
                     lastRowInWeek.insertAdjacentElement('afterend', newRow);
@@ -409,20 +448,34 @@
             }
 
             // --- FUNÇÃO PRINCIPAL DE RENDERIZAÇÃO ---
-            function createServiceRow(weekIndex, service) {
+            function createServiceRow(weekIndex, service, disabledState) {
                  const rowId = `row-${Date.now()}-${Math.random()}`;
                  const row = document.createElement('tr');
                  row.className = 'border-b border-gray-200 hover:bg-gray-50';
                  row.dataset.rowId = rowId;
                  row.dataset.weekIndex = weekIndex;
-                 const disabledState = isLoggedIn ? '' : 'disabled';
+
+                const createSelectForRole = (names, selectedValue, classes = '') => {
+                    let optionsHtml = '';
+                    const nameSet = new Set(names);
+                    if (!nameSet.has(selectedValue)) {
+                        nameSet.add(selectedValue);
+                    }
+                    const sortedNames = [...nameSet].sort();
+
+                    for (const name of sortedNames) {
+                        optionsHtml += `<option value="${name}" ${name === selectedValue ? 'selected' : ''}>${name}</option>`;
+                    }
+                    return `<select class="p-1 border rounded w-full text-center ${classes}" ${disabledState}>${optionsHtml}</select>`;
+                };
+                 
                  row.innerHTML = `
                     <td class="p-3"><input type="date" class="p-1 border rounded w-full date-input" value="${service.date}" data-row-id="${rowId}" ${disabledState}></td>
                     <td id="day-cell-${rowId}" class="p-3">${service.day}</td>
                     <td class="p-3 font-semibold text-blue-700">${service.type}</td>
-                    <td class="p-2"><input type="text" class="p-1 border rounded w-full text-center" value="${service.portaria}" ${disabledState}></td>
-                    <td class="p-2"><input type="text" class="p-1 border rounded w-full text-center" value="${service.direcao}" ${disabledState}></td>
-                    <td class="p-2"><input type="text" class="p-1 border rounded w-full text-center font-semibold" value="${service.preleitor}" ${disabledState}></td>`;
+                    <td class="p-2">${createSelectForRole(uniqueStaffNames, service.portaria)}</td>
+                    <td class="p-2">${createSelectForRole(uniqueStaffNames, service.direcao)}</td>
+                    <td class="p-2">${createSelectForRole(uniqueStaffNames, service.preleitor, 'font-semibold')}</td>`;
                  return row;
             }
 
@@ -446,7 +499,7 @@
                     scheduleData.weeks.forEach((week, weekIndex) => {
                         scheduleBody.appendChild(createWeekHeader(weekIndex, week.weekName));
                         if(week.services) {
-                           week.services.forEach(service => scheduleBody.appendChild(createServiceRow(weekIndex, service)));
+                           week.services.forEach(service => scheduleBody.appendChild(createServiceRow(weekIndex, service, disabledState)));
                         }
                     });
                 } else {
@@ -465,12 +518,21 @@
                                 let type = cultos[dayOfWeek];
                                 if (dayOfWeek === 0 && weekIndex === 1) type = "SANTA CEIA";
                                 if (dayOfWeek === 0 && weekIndex === 2) type = "CULTO DE MISSÕES";
-                                const serviceData = {
+                                
+                                let serviceData = {
                                     date: date.toISOString().split('T')[0],
                                     day: dayNames[dayOfWeek].toUpperCase(), type,
                                     portaria: 'A definir', direcao: 'A definir', preleitor: 'A definir'
                                 };
-                                weekRows.push(createServiceRow(weekIndex, serviceData));
+                                
+                                if (month === 9 && octoberData[weekIndex] && octoberData[weekIndex][dayOfWeek]) {
+                                    const data = octoberData[weekIndex][dayOfWeek];
+                                    serviceData.portaria = data.portaria;
+                                    serviceData.direcao = data.direcao;
+                                    serviceData.preleitor = data.preleitor;
+                                }
+
+                                weekRows.push(createServiceRow(weekIndex, serviceData, disabledState));
                             }
                         });
                         if (weekRows.length > 0) {
