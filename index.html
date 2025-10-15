@@ -22,6 +22,62 @@
             appearance: none;
             background-image: none;
         }
+
+        @media print {
+            body {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+                background-color: white;
+            }
+
+            #header-buttons, #auth-container, .border-b, footer, .remove-week-culto-btn, .add-culto-btn, #add-culto-modal, #remove-culto-modal, #tab-saved {
+                display: none !important;
+            }
+
+            body, #main-content, #main-content > div {
+                padding: 0;
+                margin: 0;
+            }
+            
+            #main-content > div {
+                max-width: 100% !important;
+            }
+
+            .shadow-md, .rounded-t-lg, .rounded-b-lg {
+                box-shadow: none !important;
+                border-radius: 0 !important;
+            }
+            
+            .bg-blue-500 {
+                background-color: #e5e7eb !important;
+                color: black !important;
+            }
+            .bg-blue-200 {
+                background-color: #f3f4f6 !important;
+                color: black !important;
+            }
+
+            input, select {
+                border: none !important;
+                background-color: transparent !important;
+                box-shadow: none !important;
+                padding: 1px;
+            }
+
+            .auto-size-select {
+                width: auto !important;
+                display: inline-block;
+            }
+
+            @page {
+                size: A4 landscape;
+                margin: 15mm;
+            }
+
+            table {
+                font-size: 10pt;
+            }
+        }
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800">
@@ -58,11 +114,12 @@
 
     <!-- Conteúdo Principal -->
     <div id="main-content">
-        <div class="container mx-auto p-4 sm:p-6 md:p-8">
+        <div class="max-w-screen-2xl mx-auto p-2 sm:p-4">
             <!-- Cabeçalho -->
             <div class="bg-blue-600 text-white text-center py-4 rounded-t-lg shadow-lg relative">
-                <h1 class="text-2xl md:text-3xl font-bold tracking-wider">ESCALA DOS CULTOS</h1>
-                <div class="absolute top-1/2 right-4 -translate-y-1/2 flex gap-2">
+                <h1 class="text-xl md:text-2xl font-bold tracking-wider">ESCALA DOS CULTOS</h1>
+                <div id="header-buttons" class="absolute top-1/2 right-4 -translate-y-1/2 flex gap-2">
+                    <button id="print-btn" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-3 rounded-lg text-sm transition-colors">Imprimir</button>
                     <button id="save-schedule-btn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded-lg text-sm transition-colors hidden">Salvar Escala</button>
                     <button id="auth-btn" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-3 rounded-lg text-sm transition-colors">Login para Editar</button>
                 </div>
@@ -80,23 +137,23 @@
                 <!-- View do Editor -->
                 <div id="editor-view">
                     <!-- Controles de Mês e Ano -->
-                    <div class="flex flex-col sm:flex-row justify-center items-center gap-4 my-6 p-4">
+                    <div class="flex flex-col sm:flex-row justify-center items-center gap-4 my-4 p-2">
                         <div class="w-full sm:w-auto">
-                            <label for="month-select" class="font-semibold mr-2">Mês:</label>
+                            <label for="month-select" class="font-semibold mr-2 text-sm">Mês:</label>
                             <select id="month-select" class="p-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"></select>
                         </div>
                         <div class="w-full sm:w-auto">
-                            <label for="year-input" class="font-semibold mr-2">Ano:</label>
+                            <label for="year-input" class="font-semibold mr-2 text-sm">Ano:</label>
                             <input type="number" id="year-input" class="p-2 border border-gray-300 rounded-lg shadow-sm w-28 focus:outline-none focus:ring-2 focus:ring-blue-500" min="2000" max="2100">
                         </div>
                     </div>
 
                     <!-- Tabela da Escala -->
-                    <div class="overflow-x-auto p-4">
-                        <table class="w-full text-sm md:text-base text-center">
+                    <div class="overflow-x-auto p-2">
+                        <table class="w-full text-xs sm:text-sm text-center">
                             <thead class="bg-blue-500 text-white uppercase tracking-wider">
                                 <tr>
-                                    <th class="p-3">Data</th><th class="p-3">Dia</th><th class="p-3">Culto</th><th class="p-3">Portaria</th><th class="p-3">Direção</th><th class="p-3">Preleitor</th>
+                                    <th class="px-2 py-2">Data</th><th class="px-2 py-2">Dia</th><th class="px-2 py-2">Culto</th><th class="px-2 py-2">Portaria</th><th class="px-2 py-2">Direção</th><th class="px-2 py-2">Preleitor</th>
                                 </tr>
                             </thead>
                             <tbody id="schedule-body"></tbody>
@@ -112,7 +169,7 @@
                     </div>
                 </div>
             </div>
-            <footer class="text-center text-gray-500 mt-8 text-sm">
+            <footer class="text-center text-gray-500 mt-6 text-xs">
                 <p>Gerado dinamicamente. As escalas são exemplos ilustrativos.</p>
             </footer>
         </div>
@@ -211,6 +268,7 @@
             const authContainer = document.getElementById('auth-container');
             const loginForm = document.getElementById('login-form');
             const authBtn = document.getElementById('auth-btn');
+            const printBtn = document.getElementById('print-btn');
             const cancelLoginBtn = document.getElementById('cancel-login-btn');
             const saveScheduleBtn = document.getElementById('save-schedule-btn');
             const loginError = document.getElementById('login-error');
@@ -269,7 +327,9 @@
             ];
 
 
-            // --- LÓGICA DE AUTENTICAÇÃO ---
+            // --- LÓGICA DE AUTENTICAÇÃO E BOTÕES ---
+            printBtn.addEventListener('click', () => window.print());
+
             const checkAuth = () => {
                 isLoggedIn = sessionStorage.getItem('escala_loggedin') === 'true';
                 updateAuthUI();
@@ -356,7 +416,6 @@
                         const weekIndex = parseInt(row.dataset.weekIndex);
                         const cells = row.querySelectorAll('td');
                         
-                        // Checagens de segurança para evitar erros
                         const portariaSelects = cells[3].querySelectorAll('select');
                         const direcaoSelect = cells[4].querySelector('select');
                         const preleitorSelect = cells[5].querySelector('select');
@@ -381,7 +440,7 @@
                         }
                     });
                     
-                    scheduleData.weeks = scheduleData.weeks.filter(Boolean); // Limpa semanas vazias
+                    scheduleData.weeks = scheduleData.weeks.filter(Boolean);
 
                     await setDoc(doc(schedulesCollection, scheduleId), scheduleData);
                     alert(`Escala para ${scheduleData.scheduleName} salva com sucesso!`);
@@ -403,16 +462,21 @@
                         const schedule = doc.data();
                         const el = document.createElement('div');
                         el.className = 'flex justify-between items-center bg-gray-50 p-3 rounded-lg border';
+                        
+                        const deleteButtonHtml = isLoggedIn ? `<button data-id="${doc.id}" class="delete-btn bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 text-sm">Excluir</button>` : '';
+
                         el.innerHTML = `
                             <span class="font-medium text-gray-800">${schedule.scheduleName}</span>
                             <div class="flex gap-2">
                                 <button data-id="${doc.id}" class="load-btn bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 text-sm">Carregar</button>
-                                <button data-id="${doc.id}" class="delete-btn bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 text-sm">Excluir</button>
+                                ${deleteButtonHtml}
                             </div>`;
                         listContainer.appendChild(el);
                     });
                     listContainer.querySelectorAll('.load-btn').forEach(b => b.addEventListener('click', (e) => loadSpecificSchedule(e.target.dataset.id)));
-                    listContainer.querySelectorAll('.delete-btn').forEach(b => b.addEventListener('click', (e) => deleteSchedule(e.target.dataset.id)));
+                    if (isLoggedIn) {
+                        listContainer.querySelectorAll('.delete-btn').forEach(b => b.addEventListener('click', (e) => deleteSchedule(e.target.dataset.id)));
+                    }
                 } catch (error) { console.error("Erro ao carregar:", error); listContainer.innerHTML = '<p class="text-red-500">Erro ao carregar.</p>'; }
             }
 
@@ -430,12 +494,22 @@
             }
 
             async function deleteSchedule(docId) {
-                if (confirm("Tem certeza que deseja excluir esta escala?")) {
-                    try {
-                        await deleteDoc(doc(schedulesCollection, docId));
-                        alert("Escala excluída com sucesso.");
-                        loadSavedSchedules();
-                    } catch (error) { console.error("Erro ao excluir:", error); alert("Erro ao excluir a escala."); }
+                const password = prompt("Para confirmar a exclusão, por favor, digite a senha de acesso:");
+                if (password === null) return; // User cancelled
+
+                if (password === '3458') {
+                    if (confirm("Tem certeza que deseja excluir esta escala permanentemente?")) {
+                        try {
+                            await deleteDoc(doc(schedulesCollection, docId));
+                            alert("Escala excluída com sucesso.");
+                            loadSavedSchedules();
+                        } catch (error) { 
+                            console.error("Erro ao excluir:", error); 
+                            alert("Erro ao excluir a escala."); 
+                        }
+                    }
+                } else {
+                    alert("Senha incorreta. A exclusão foi cancelada.");
                 }
             }
             
@@ -508,7 +582,7 @@
                     for (const name of sortedNames) {
                         optionsHtml += `<option value="${name}" ${name === selectedValue ? 'selected' : ''}>${name}</option>`;
                     }
-                    return `<select class="p-1 border rounded w-full text-center auto-size-select ${classes}" ${disabledState}>${optionsHtml}</select>`;
+                    return `<select class="p-1 border-0 rounded w-full text-center auto-size-select ${classes}" ${disabledState}>${optionsHtml}</select>`;
                 };
                 
                 const portariaParts = service.portaria.includes('/') 
@@ -516,15 +590,15 @@
                     : [service.portaria.trim(), 'A DEFINIR'];
                  
                  row.innerHTML = `
-                    <td class="p-3"><input type="date" class="p-1 border rounded w-full date-input" value="${service.date}" data-row-id="${rowId}" ${disabledState}></td>
-                    <td id="day-cell-${rowId}" class="p-3">${service.day}</td>
-                    <td class="p-3 font-semibold text-blue-700">${service.type}</td>
-                    <td class="p-2 flex flex-col gap-1 items-center justify-center">
+                    <td class="px-2 py-1"><input type="date" class="p-1 border-0 rounded w-full date-input" value="${service.date}" data-row-id="${rowId}" ${disabledState}></td>
+                    <td id="day-cell-${rowId}" class="px-2 py-1">${service.day}</td>
+                    <td class="px-2 py-1 font-semibold text-blue-700">${service.type}</td>
+                    <td class="px-1 py-1 flex flex-col gap-1 items-center justify-center">
                         ${createSelectForRole(staffNames, portariaParts[0])}
                         ${createSelectForRole(staffNames, portariaParts[1])}
                     </td>
-                    <td class="p-2">${createSelectForRole(staffNames, service.direcao)}</td>
-                    <td class="p-2">${createSelectForRole(staffNames, service.preleitor, 'font-semibold')}</td>`;
+                    <td class="px-1 py-1">${createSelectForRole(staffNames, service.direcao)}</td>
+                    <td class="px-1 py-1">${createSelectForRole(staffNames, service.preleitor, 'font-semibold')}</td>`;
                  return row;
             }
 
