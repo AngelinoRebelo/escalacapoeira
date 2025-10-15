@@ -193,6 +193,14 @@
                 }
             } catch(error) {
                 console.error("Authentication failed:", error);
+                if (error.code === 'auth/custom-token-mismatch' || error.code === 'auth/invalid-custom-token') {
+                    console.log("Custom token failed, falling back to anonymous sign-in.");
+                    try {
+                        await signInAnonymously(auth);
+                    } catch (anonError) {
+                        console.error("Anonymous sign-in also failed:", anonError);
+                    }
+                }
             }
         }
         authenticate();
@@ -249,7 +257,7 @@
                     0: { portaria: 'DCa. ROSA/MISS. VANESSA', direcao: 'MISS.ANA', preleitor: 'A DEFINIR' }
                 },
                 {
-                    3: { portaria: 'MISS.ESTER/OB. CLEMILTON', direcao: 'MISS. LORRANE', preleitor: 'PRB. LEANDRO' },
+                    3: { portaria: 'MISS.ESTER/OB. CLEMILTON', direcao: 'MISS.LORRANE', preleitor: 'PRB. LEANDRO' },
                     5: { portaria: 'IR. VITÓRIA/IR. GABRIEL', direcao: 'DCa.SIMONE', preleitor: 'A DEFINIR' },
                     0: { portaria: 'OB. MARCOS/MISS. KELLY', direcao: 'PR. GABRIEL', preleitor: 'A DEFINIR' }
                 },
@@ -328,45 +336,60 @@
 
             async function saveScheduleToFirebase() {
                 if (!schedulesCollection) { alert("Erro de conexão com o Firebase."); return; }
-                const month = parseInt(monthSelect.value);
-                const year = parseInt(yearInput.value);
-                const scheduleId = `${year}-${String(month + 1).padStart(2, '0')}`;
                 
-                const scheduleData = { month, year, scheduleName: `${months[month]} de ${year}`, weeks: [] };
-
-                scheduleBody.querySelectorAll('tr[data-week-num]').forEach(headerRow => {
-                    const weekNum = parseInt(headerRow.dataset.weekNum);
-                    scheduleData.weeks[weekNum] = {
-                        weekName: headerRow.querySelector('td').childNodes[0].textContent.trim(),
-                        services: []
-                    };
-                });
-
-                scheduleBody.querySelectorAll('tr[data-row-id]').forEach(row => {
-                    const weekIndex = parseInt(row.dataset.weekIndex);
-                    const cells = row.querySelectorAll('td');
-                    const portariaSelects = cells[3].querySelectorAll('select');
-                    const portariaValue = `${portariaSelects[0].value} / ${portariaSelects[1].value}`;
-
-                    const service = {
-                        date: cells[0].querySelector('input').value,
-                        day: cells[1].textContent,
-                        type: cells[2].textContent,
-                        portaria: portariaValue,
-                        direcao: cells[4].querySelector('select').value,
-                        preleitor: cells[5].querySelector('select').value
-                    };
-                    if (scheduleData.weeks[weekIndex]) {
-                        scheduleData.weeks[weekIndex].services.push(service);
-                    }
-                });
-                scheduleData.weeks = scheduleData.weeks.filter(Boolean);
-
                 try {
+                    const month = parseInt(monthSelect.value);
+                    const year = parseInt(yearInput.value);
+                    const scheduleId = `${year}-${String(month + 1).padStart(2, '0')}`;
+                    
+                    const scheduleData = { month, year, scheduleName: `${months[month]} de ${year}`, weeks: [] };
+
+                    scheduleBody.querySelectorAll('tr[data-week-num]').forEach(headerRow => {
+                        const weekNum = parseInt(headerRow.dataset.weekNum);
+                        scheduleData.weeks[weekNum] = {
+                            weekName: headerRow.querySelector('td').childNodes[0].textContent.trim(),
+                            services: []
+                        };
+                    });
+
+                    scheduleBody.querySelectorAll('tr[data-row-id]').forEach(row => {
+                        const weekIndex = parseInt(row.dataset.weekIndex);
+                        const cells = row.querySelectorAll('td');
+                        
+                        // Checagens de segurança para evitar erros
+                        const portariaSelects = cells[3].querySelectorAll('select');
+                        const direcaoSelect = cells[4].querySelector('select');
+                        const preleitorSelect = cells[5].querySelector('select');
+
+                        if (!portariaSelects || portariaSelects.length < 2 || !direcaoSelect || !preleitorSelect) {
+                            throw new Error("Não foi possível encontrar todos os campos de seleção em uma linha da tabela.");
+                        }
+                        
+                        const portariaValue = `${portariaSelects[0].value} / ${portariaSelects[1].value}`;
+
+                        const service = {
+                            date: cells[0].querySelector('input').value,
+                            day: cells[1].textContent,
+                            type: cells[2].textContent,
+                            portaria: portariaValue,
+                            direcao: direcaoSelect.value,
+                            preleitor: preleitorSelect.value
+                        };
+                        
+                        if (scheduleData.weeks[weekIndex]) {
+                            scheduleData.weeks[weekIndex].services.push(service);
+                        }
+                    });
+                    
+                    scheduleData.weeks = scheduleData.weeks.filter(Boolean); // Limpa semanas vazias
+
                     await setDoc(doc(schedulesCollection, scheduleId), scheduleData);
                     alert(`Escala para ${scheduleData.scheduleName} salva com sucesso!`);
                     tabSaved.click();
-                } catch (error) { console.error("Erro ao salvar:", error); alert("Erro ao salvar a escala."); }
+                } catch (error) { 
+                    console.error("Erro ao salvar:", error); 
+                    alert("Erro ao salvar a escala. Detalhes: " + error.message); 
+                }
             }
             
             async function loadSavedSchedules() {
