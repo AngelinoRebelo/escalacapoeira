@@ -117,7 +117,7 @@
         <div class="max-w-screen-2xl mx-auto p-2 sm:p-4">
             <!-- Cabeçalho -->
             <div class="bg-blue-600 text-white text-center py-4 rounded-t-lg shadow-lg relative">
-                <h1 class="text-xl md:text-2xl font-bold tracking-wider">ESCALA DOS CULTOS</h1>
+                <h1 class="text-xl md:text-2xl font-bold tracking-wider">ESCALA DE CULTOS ADCA - CAPOEIRA GRANDE</h1>
                 <div id="header-buttons" class="absolute top-1/2 right-4 -translate-y-1/2 flex items-center gap-2">
                     <button id="print-btn" title="Imprimir" class="p-2 bg-gray-500 hover:bg-gray-600 text-white rounded-full transition-colors">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -180,7 +180,7 @@
                 </div>
             </div>
             <footer class="text-center text-gray-500 mt-6 text-xs">
-                <p>Gerado dinamicamente. As escalas são exemplos ilustrativos.</p>
+                <p>&copy; Copyright. Todos os direitos reservados.</p>
             </footer>
         </div>
     </div>
@@ -325,29 +325,29 @@
 
             const octoberData = [
                 {
-                    3: { portaria: 'A DEFINIR/OB. CLEMILTON', direcao: 'A DEFINIR', preleitor: 'A DEFINIR' },
-                    5: { portaria: 'OB. CLEMILTON/MISS. ESTER', direcao: 'DCa.SIMONE', preleitor: 'DCa.SIMONE' },
-                    0: { portaria: 'DCa. RAQUEL/IR. GABRIEL', direcao: 'A DEFINIR', preleitor: 'A DEFINIR' }
+                    3: { portaria: 'A DEFINIR/OB. CLEMILTON', direcao: 'A DEFINIR', preleitor: 'A DEFINIR', info: '' },
+                    5: { portaria: 'OB. CLEMILTON/MISS. ESTER', direcao: 'DCa.SIMONE', preleitor: 'DCa.SIMONE', info: '' },
+                    0: { portaria: 'DCa. RAQUEL/IR. GABRIEL', direcao: 'A DEFINIR', preleitor: 'A DEFINIR', info: '' }
                 },
                 {
-                    3: { portaria: 'MISS.LORRANE/IR. VITÓRIA', direcao: 'A DEFINIR', preleitor: 'PR. GABRIEL' },
-                    5: { portaria: 'MISS. KELLY/OB. ANA ROCHA', direcao: 'DCa.SIMONE', preleitor: 'A DEFINIR' },
-                    0: { portaria: 'A DEFINIR/OB. MARCOS', direcao: 'MISS. KELLY', preleitor: 'PR. GABRIEL' }
+                    3: { portaria: 'MISS.LORRANE/IR. VITÓRIA', direcao: 'A DEFINIR', preleitor: 'PR. GABRIEL', info: '' },
+                    5: { portaria: 'MISS. KELLY/OB. ANA ROCHA', direcao: 'DCa.SIMONE', preleitor: 'A DEFINIR', info: '' },
+                    0: { portaria: 'A DEFINIR/OB. MARCOS', direcao: 'MISS. KELLY', preleitor: 'PR. GABRIEL', info: '' }
                 },
                 {
-                    3: { portaria: 'OB. ANA ROCHA/A DEFINIR', direcao: 'OB. JANETE', preleitor: 'A DEFINIR' },
-                    5: { portaria: 'IR. VITÓRIA/OB. CLEMILTON', direcao: 'DCa.SIMONE', preleitor: 'A DEFINIR' },
-                    0: { portaria: 'DCa. ROSA/A DEFINIR', direcao: 'MISS.ANA', preleitor: 'A DEFINIR' }
+                    3: { portaria: 'OB. ANA ROCHA/A DEFINIR', direcao: 'OB. JANETE', preleitor: 'A DEFINIR', info: '' },
+                    5: { portaria: 'IR. VITÓRIA/OB. CLEMILTON', direcao: 'DCa.SIMONE', preleitor: 'A DEFINIR', info: '' },
+                    0: { portaria: 'DCa. ROSA/A DEFINIR', direcao: 'MISS.ANA', preleitor: 'A DEFINIR', info: '' }
                 },
                 {
-                    3: { portaria: 'MISS.ESTER/OB. CLEMILTON', direcao: 'MISS.LORRANE', preleitor: 'PRB. LEANDRO' },
-                    5: { portaria: 'IR. VITÓRIA/IR. GABRIEL', direcao: 'DCa.SIMONE', preleitor: 'A DEFINIR' },
-                    0: { portaria: 'OB. MARCOS/MISS. KELLY', direcao: 'PR. GABRIEL', preleitor: 'A DEFINIR' }
+                    3: { portaria: 'MISS.ESTER/OB. CLEMILTON', direcao: 'MISS.LORRANE', preleitor: 'PRB. LEANDRO', info: '' },
+                    5: { portaria: 'IR. VITÓRIA/IR. GABRIEL', direcao: 'DCa.SIMONE', preleitor: 'A DEFINIR', info: '' },
+                    0: { portaria: 'OB. MARCOS/MISS. KELLY', direcao: 'PR. GABRIEL', preleitor: 'A DEFINIR', info: '' }
                 },
                 {
-                    3: { portaria: 'OB. JANETE/A DEFINIR', direcao: 'MISS.ESTER', preleitor: 'A DEFINIR' },
-                    5: { portaria: 'A DEFINIR/IR. VITÓRIA', direcao: 'DCa.SIMONE', preleitor: 'A DEFINIR' },
-                    0: { portaria: 'OB. MARCOS/DCa. RAQUEL', direcao: 'PRB. LEANDRO', preleitor: 'A DEFINIR' }
+                    3: { portaria: 'OB. JANETE/A DEFINIR', direcao: 'MISS.ESTER', preleitor: 'A DEFINIR', info: '' },
+                    5: { portaria: 'A DEFINIR/IR. VITÓRIA', direcao: 'DCa.SIMONE', preleitor: 'A DEFINIR', info: '' },
+                    0: { portaria: 'OB. MARCOS/DCa. RAQUEL', direcao: 'PRB. LEANDRO', preleitor: 'A DEFINIR', info: '' }
                 }
             ];
 
@@ -459,7 +459,8 @@
                         const service = {
                             date: cells[0].querySelector('input').value,
                             day: cells[1].textContent,
-                            type: cells[2].textContent,
+                            type: cells[2].querySelector('[data-type]').textContent,
+                            info: cells[2].querySelector('[data-info-display]').textContent,
                             portaria: portariaValue,
                             direcao: direcaoSelect.value,
                             preleitor: preleitorSelect.value
@@ -554,6 +555,19 @@
                 passwordConfirmError.classList.add('hidden');
                 passwordConfirmModal.style.display = 'flex';
             }
+            
+            function onEditInfoClick(e) {
+                const btn = e.currentTarget;
+                const infoDisplay = btn.closest('td').querySelector('[data-info-display]');
+                if (!infoDisplay) return;
+                
+                const currentText = infoDisplay.textContent;
+                const newInfo = prompt("Adicionar/Editar Informação:", currentText);
+                
+                if (newInfo !== null) { // User clicked OK
+                    infoDisplay.textContent = newInfo.trim();
+                }
+            }
 
             const addCultoModal = document.getElementById('add-culto-modal');
             const removeCultoModal = document.getElementById('remove-culto-modal');
@@ -586,6 +600,7 @@
                         date: newDate,
                         day: dayNames[dateObj.getDay()].toUpperCase(),
                         type: document.getElementById('new-culto-type').value,
+                        info: '',
                         portaria: 'A DEFINIR', direcao: 'A DEFINIR', preleitor: 'A DEFINIR'
                     };
                     
@@ -599,6 +614,7 @@
                         autoSizeSelect(select);
                         select.addEventListener('change', () => autoSizeSelect(select));
                     });
+                    newRow.querySelector('.edit-info-btn').addEventListener('click', onEditInfoClick);
                     
                     addCultoModal.style.display = 'none';
                 });
@@ -657,7 +673,15 @@
                  row.innerHTML = `
                     <td class="px-2 py-1"><input type="date" class="p-1 border-0 rounded w-full date-input" value="${service.date}" data-row-id="${rowId}" ${disabledState}></td>
                     <td id="day-cell-${rowId}" class="px-2 py-1">${service.day}</td>
-                    <td class="px-2 py-1 font-semibold text-blue-700">${service.type}</td>
+                    <td class="px-2 py-1 font-semibold text-blue-700 relative group">
+                        <div data-type>${service.type}</div>
+                        <div data-info-display class="text-xs text-gray-500 italic">${service.info || ''}</div>
+                        <button class="edit-info-btn absolute top-1 right-1 p-0.5 bg-blue-100 rounded-full text-blue-600 opacity-0 group-hover:opacity-100 ${disabledState === 'disabled' ? 'hidden' : ''}" title="Adicionar/Editar Informação">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                            </svg>
+                        </button>
+                    </td>
                     <td class="px-1 py-1 flex flex-col gap-1 items-center justify-center">
                         ${createSelectForRole(staffNames, portariaParts[0], '', 'portaria')}
                         ${createSelectForRole(staffNames, portariaParts[1], '', 'portaria')}
@@ -710,6 +734,7 @@
                                 let serviceData = {
                                     date: date.toISOString().split('T')[0],
                                     day: dayNames[dayOfWeek].toUpperCase(), type,
+                                    info: '',
                                     portaria: 'A DEFINIR', direcao: 'A DEFINIR', preleitor: 'A DEFINIR'
                                 };
                                 
@@ -747,7 +772,7 @@
                     list.innerHTML = '';
                     scheduleBody.querySelectorAll(`tr[data-week-index="${currentWeekForModal}"]`).forEach(row => {
                         const cells = row.querySelectorAll('td');
-                        list.innerHTML += `<label class="flex items-center gap-2"><input type="checkbox" value="${row.dataset.rowId}">${cells[2].textContent} (${cells[0].querySelector('input').value})</label>`;
+                        list.innerHTML += `<label class="flex items-center gap-2"><input type="checkbox" value="${row.dataset.rowId}">${cells[2].querySelector('[data-type]').textContent} (${cells[0].querySelector('input').value})</label>`;
                     });
                     if (list.innerHTML === '') {
                         list.innerHTML = '<p class="text-gray-500">Nenhum culto para remover nesta semana.</p>';
@@ -758,6 +783,10 @@
                 document.querySelectorAll('select.auto-size-select').forEach(select => {
                     autoSizeSelect(select);
                     select.addEventListener('change', () => autoSizeSelect(select));
+                });
+
+                document.querySelectorAll('.edit-info-btn').forEach(btn => {
+                    btn.addEventListener('click', onEditInfoClick);
                 });
                 
                 document.querySelectorAll('select[data-role="preleitor"]').forEach(select => {
@@ -777,10 +806,10 @@
                                     
                                     document.querySelectorAll('select').forEach(s => {
                                         if (s.dataset.role === 'preleitor' || s.dataset.role === 'portaria' || s.dataset.role === 'direcao') {
-                                            const newOption = new Option(trimmedName, trimmedName);
-                                            if (s.querySelector('option[value="__outro__"]')) {
+                                             const newOption = new Option(trimmedName, trimmedName);
+                                             if (s.querySelector('option[value="__outro__"]')) {
                                                 s.add(newOption, s.options[s.options.length - 2]); // Antes de "Adicionar" e "Deletar"
-                                            } else {
+                                             } else {
                                                 s.add(newOption);
                                                 // Re-sort options se não for preleitor
                                                 if (s.dataset.role !== 'preleitor') {
@@ -788,7 +817,7 @@
                                                         .sort((a, b) => a.text.localeCompare(b.text))
                                                         .forEach(option => s.add(option));
                                                 }
-                                            }
+                                             }
                                         }
                                     });
                                 }
@@ -830,7 +859,7 @@
                                 document.querySelectorAll('select[data-role="portaria"], select[data-role="direcao"], select[data-role="preleitor"]').forEach(s => {
                                     const optionToRemove = s.querySelector(`option[value="${trimmedName}"]`);
                                     if (optionToRemove) {
-                                        optionToRemove.remove();
+                                        s.remove(optionToRemove.index);
                                     }
                                 });
                                 
