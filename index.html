@@ -30,7 +30,7 @@
                 background-color: white;
             }
 
-            #header-buttons, #auth-container, .border-b, footer, .remove-week-culto-btn, .add-culto-btn, #add-culto-modal, #remove-culto-modal, #tab-saved, #password-confirm-modal {
+            #header-buttons, #auth-container, .border-b, footer, .remove-week-culto-btn, .add-culto-btn, #add-culto-modal, #remove-culto-modal, #tab-saved, #password-confirm-modal, .edit-info-btn {
                 display: none !important;
             }
 
@@ -54,6 +54,11 @@
             }
             .bg-blue-200 {
                 background-color: #f3f4f6 !important;
+                color: black !important;
+            }
+            
+            .table-header-week {
+                 background-color: #e5e7eb !important;
                 color: black !important;
             }
 
@@ -161,11 +166,7 @@
                     <!-- Tabela da Escala -->
                     <div class="overflow-x-auto p-2">
                         <table class="w-full text-xs sm:text-sm text-center">
-                            <thead class="bg-blue-500 text-white uppercase tracking-wider">
-                                <tr>
-                                    <th class="px-2 py-2">Data</th><th class="px-2 py-2">Dia</th><th class="px-2 py-2">Culto</th><th class="px-2 py-2">Portaria</th><th class="px-2 py-2">Direção</th><th class="px-2 py-2">Preleitor</th>
-                                </tr>
-                            </thead>
+                            <!-- Cabeçalho principal removido daqui -->
                             <tbody id="schedule-body"></tbody>
                         </table>
                     </div>
@@ -353,6 +354,15 @@
 
             const loginIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>`;
             const logoutIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>`;
+            const weekHeaderHTML = `
+                <tr class="bg-blue-500 text-white uppercase tracking-wider text-xs sm:text-sm table-header-week">
+                    <th class="px-2 py-2">Data</th>
+                    <th class="px-2 py-2">Dia</th>
+                    <th class="px-2 py-2">Culto</th>
+                    <th class="px-2 py-2">Portaria</th>
+                    <th class="px-2 py-2">Direção</th>
+                    <th class="px-2 py-2">Preleitor</th>
+                </tr>`;
 
 
             // --- LÓGICA DE AUTENTICAÇÃO E BOTÕES ---
@@ -704,12 +714,17 @@
                             <button class="remove-week-culto-btn bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-700" data-week-num="${weekIndex}" ${disabledState}>-</button>
                             <button class="add-culto-btn bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-blue-700" data-week-num="${weekIndex}" ${disabledState}>+</button>
                         </div></td>`;
-                    return row;
+                    
+                    const headerRow = document.createElement('tr');
+                    headerRow.innerHTML = weekHeaderHTML;
+                    
+                    scheduleBody.appendChild(row);
+                    scheduleBody.appendChild(headerRow);
                 };
                 
                 if (scheduleData && scheduleData.weeks) {
                     scheduleData.weeks.forEach((week, weekIndex) => {
-                        scheduleBody.appendChild(createWeekHeader(weekIndex, week.weekName));
+                        createWeekHeader(weekIndex, week.weekName);
                         if(week.services) {
                            week.services.forEach(service => scheduleBody.appendChild(createServiceRow(weekIndex, service, disabledState)));
                         }
@@ -750,7 +765,7 @@
                         });
                         if (weekRows.length > 0) {
                             const name = `${weekNames[weekIndex]} SEMANA DE ${months[month].toUpperCase()}`;
-                            scheduleBody.appendChild(createWeekHeader(weekIndex, name));
+                            createWeekHeader(weekIndex, name);
                             weekRows.forEach(row => scheduleBody.appendChild(row));
                         }
                     }
