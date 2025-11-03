@@ -30,7 +30,7 @@
                 background-color: white;
             }
 
-            #header-buttons, #auth-container, .border-b, footer, .remove-week-culto-btn, .add-culto-btn, #add-culto-modal, #remove-culto-modal, #tab-saved, #password-confirm-modal, .edit-info-btn {
+            #header-buttons, #auth-container, .border-b, footer, .remove-week-culto-btn, .add-culto-btn, #add-culto-modal, #remove-culto-modal, #tab-saved, #password-confirm-modal {
                 display: none !important;
             }
 
@@ -264,11 +264,14 @@
         let userId = null;
         let schedulesCollection;
 
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                userId = user.uid;
-                schedulesCollection = collection(db, 'schedules');
-            }
+        const authReady = new Promise((resolve) => {
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    userId = user.uid;
+                    schedulesCollection = collection(db, 'schedules');
+                    resolve(true);
+                }
+            });
         });
         
         async function authenticate() {
@@ -496,6 +499,7 @@
                 const listContainer = document.getElementById('saved-schedules-list');
                 listContainer.innerHTML = '<p class="text-gray-500">Carregando...</p>';
                 try {
+                    await authReady; // Garante que o firebase está pronto
                     const querySnapshot = await getDocs(schedulesCollection);
                     if (querySnapshot.empty) { listContainer.innerHTML = '<p class="text-gray-500">Nenhuma escala salva.</p>'; return; }
                     listContainer.innerHTML = '';
@@ -892,15 +896,56 @@
             }
 
             // --- INICIALIZAÇÃO DA PÁGINA ---
-            function initialize() {
+            async function initialize() {
                 checkAuth();
                 const today = new Date();
+                const currentMonth = today.getMonth();
+                const currentYear = today.getFullYear();
+
                 months.forEach((m, i) => monthSelect.innerHTML += `<option value="${i}">${m}</option>`);
-                monthSelect.value = today.getMonth();
-                yearInput.value = today.getFullYear();
-                renderSchedule(today.getFullYear(), today.getMonth());
+                monthSelect.value = currentMonth;
+                yearInput.value = currentYear;
+                
+                await authReady; // Espera a autenticação do Firebase
+                
+                const scheduleId = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
+                let savedData = null;
+
+                if (schedulesCollection) {
+                    try {
+                        const docRef = doc(schedulesCollection, scheduleId);
+                        const docSnap = await getDoc(docRef);
+                        if (docSnap.exists()) {
+                            savedData = docSnap.data();
+                        }
+                    } catch (error) {
+                        console.error("Erro ao carregar escala do mês atual:", error);
+                    }
+                }
+
+                renderSchedule(currentYear, currentMonth, savedData); 
                 setupModalEvents();
-                const update = () => renderSchedule(parseInt(yearInput.value), parseInt(monthSelect.value));
+                
+                const update = async () => {
+                    const newYear = parseInt(yearInput.value);
+                    const newMonth = parseInt(monthSelect.value);
+                    const scheduleId = `${newYear}-${String(newMonth + 1).padStart(2, '0')}`;
+                    let savedData = null;
+
+                    if (schedulesCollection) {
+                        try {
+                            const docRef = doc(schedulesCollection, scheduleId);
+                            const docSnap = await getDoc(docRef);
+                            if (docSnap.exists()) {
+                                savedData = docSnap.data();
+                            }
+                        } catch (error) {
+                            console.error("Erro ao carregar escala selecionada:", error);
+                        }
+                    }
+                    renderSchedule(newYear, newMonth, savedData);
+                };
+                
                 monthSelect.addEventListener('change', update);
                 yearInput.addEventListener('change', update);
             }
