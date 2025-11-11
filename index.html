@@ -8,8 +8,97 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
-    <!-- Ligação ao ficheiro de estilos externo -->
-    <link rel="stylesheet" href="style.css"> 
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .tab-active {
+            border-bottom: 2px solid #2563EB;
+            color: #2563EB;
+        }
+        .auto-size-select {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: none;
+        }
+
+        /* Novo estilo para a célula de Portaria: usa grid para forçar o wrap */
+        .portaria-cell {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4px;
+            padding: 4px;
+        }
+
+        @media print {
+            body {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+                background-color: white;
+            }
+
+            #header-buttons, #auth-container, .border-b, footer, .remove-week-culto-btn, .add-culto-btn, #add-culto-modal, #remove-culto-modal, #tab-saved, #password-confirm-modal {
+                display: none !important;
+            }
+
+            body, #main-content, #main-content > div {
+                padding: 0;
+                margin: 0;
+            }
+            
+            #main-content > div {
+                max-width: 100% !important;
+            }
+
+            .shadow-md, .rounded-t-lg, .rounded-b-lg {
+                box-shadow: none !important;
+                border-radius: 0 !important;
+            }
+            
+            .bg-blue-500 {
+                background-color: #e5e7eb !important;
+                color: black !important;
+            }
+            .bg-blue-200 {
+                background-color: #f3f4f6 !important;
+                color: black !important;
+            }
+            
+            .table-header-week {
+                 background-color: #e5e7eb !important;
+                color: black !important;
+            }
+
+            input, select {
+                border: none !important;
+                background-color: transparent !important;
+                box-shadow: none !important;
+                padding: 1px;
+                /* Manter tamanho mínimo para impressão */
+                min-width: 50px !important; 
+            }
+            .portaria-cell {
+                display: flex;
+                flex-direction: column;
+                gap: 2px;
+            }
+
+            .auto-size-select {
+                width: auto !important;
+                display: inline-block;
+            }
+
+            @page {
+                size: A4 landscape;
+                margin: 15mm;
+            }
+
+            table {
+                font-size: 10pt;
+            }
+        }
+    </style>
 </head>
 <body class="bg-gray-100 text-gray-800">
 
@@ -53,133 +142,3 @@
                 
                 <!-- Botões: Forçado a estar na linha de baixo em mobile, centrado horizontalmente. -->
                 <div id="header-buttons" class="flex items-center justify-center gap-2 mt-2 sm:mt-0 sm:ml-auto flex-shrink-0">
-                    <button id="print-btn" title="Imprimir" class="p-2 bg-gray-500 hover:bg-gray-600 text-white rounded-full transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                        </svg>
-                    </button>
-                    <button id="report-btn" title="Gerar Relatório / PDF" class="p-2 bg-purple-600 hover:bg-purple-700 text-white rounded-full transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                    </button>
-                    <button id="save-schedule-btn" title="Salvar Escala" class="p-2 bg-blue-500 hover:bg-blue-700 text-white rounded-full transition-colors hidden">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                           <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M12 12v9m-4-4l4 4 4-4" />
-                        </svg>
-                    </button>
-                    <button id="auth-btn" title="Login para Editar" class="p-2 bg-green-500 hover:bg-green-600 text-white rounded-full transition-colors">
-                        <!-- Ícone será inserido via JS -->
-                    </button>
-                </div>
-            </div>
-
-            <!-- Abas de Navegação -->
-            <div class="bg-white shadow-md rounded-b-lg">
-                <div class="border-b border-gray-200">
-                    <nav class="-mb-px flex gap-6 px-6" aria-label="Tabs">
-                        <button id="tab-editor" class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm tab-active">Editor de Escala</button>
-                        <button id="tab-saved" class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm text-gray-500 hover:text-gray-700">Escalas Salvas</button>
-                    </nav>
-                </div>
-
-                <!-- View do Editor -->
-                <div id="editor-view">
-                    <!-- Controles de Mês e Ano -->
-                    <div class="flex flex-col sm:flex-row justify-center items-center gap-4 my-4 p-2">
-                        <div class="w-full sm:w-auto">
-                            <label for="month-select" class="font-semibold mr-2 text-sm">Mês:</label>
-                            <select id="month-select" class="p-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"></select>
-                        </div>
-                        <div class="w-full sm:w-auto">
-                            <label for="year-input" class="font-semibold mr-2 text-sm">Ano:</label>
-                            <input type="number" id="year-input" class="p-2 border border-gray-300 rounded-lg shadow-sm w-28 focus:outline-none focus:ring-2 focus:ring-blue-500" min="2000" max="2100">
-                        </div>
-                    </div>
-
-                    <!-- Tabela da Escala -->
-                    <div class="overflow-x-auto p-2">
-                        <table class="w-full text-xs sm:text-sm text-center">
-                            <!-- Cabeçalho principal removido daqui -->
-                            <tbody id="schedule-body"></tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- View de Escalas Salvas -->
-                <div id="saved-schedules-view" class="hidden p-6">
-                    <h2 class="text-xl font-bold mb-4 text-gray-700">Escalas Salvas no Firebase</h2>
-                    <div id="saved-schedules-list" class="space-y-3">
-                         <p class="text-gray-500">Nenhuma escala salva ainda.</p>
-                    </div>
-                </div>
-            </div>
-            <footer class="text-center text-gray-500 mt-6 text-xs">
-                <p>&copy; Copyright. Todos os direitos reservados.</p>
-            </footer>
-        </div>
-        </div>
-    
-    <!-- Modal para Adicionar Culto -->
-    <div id="add-culto-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
-        <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-sm mx-4">
-            <h3 class="text-xl font-bold mb-4">Adicionar Novo Culto</h3>
-            <div class="mb-4">
-                <label for="new-culto-type" class="block text-sm font-medium text-gray-700 mb-1">Tipo de Culto</label>
-                <select id="new-culto-type" class="w-full p-2 border border-gray-300 rounded-lg shadow-sm">
-                    <option>CULTO DE MISSÕES</option>
-                    <option>SANTA CEIA</option>
-                    <option>DOUTRINA</option>
-                    <option>LIBERTAÇÃO</option>
-                    <option>LOUVOR E ADORAÇÃO</option>
-                </select>
-            </div>
-            <div class="mb-6">
-                <label for="new-culto-date" class="block text-sm font-medium text-gray-700 mb-1">Data</label>
-                <input type="date" id="new-culto-date" class="w-full p-2 border border-gray-300 rounded-lg shadow-sm">
-            </div>
-            <div class="flex justify-end gap-4">
-                <button id="cancel-add-culto" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400">Cancelar</button>
-                <button id="confirm-add-culto" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Adicionar</button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Modal para Remover Culto -->
-    <div id="remove-culto-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
-        <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-sm mx-4">
-            <h3 class="text-xl font-bold mb-4">Remover Culto(s)</h3>
-            <p class="text-gray-600 mb-4">Selecione os cultos que deseja remover desta semana.</p>
-            <div id="remove-culto-list" class="space-y-2 max-h-60 overflow-y-auto mb-6">
-            </div>
-            <div class="flex justify-end gap-4">
-                <button id="cancel-remove-culto" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400">Cancelar</button>
-                <button id="confirm-remove-culto" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">Remover Selecionados</button>
-            </div>
-            <div id="remove-error" class="text-red-500 text-sm mt-2 hidden">Nenhum culto selecionado.</div>
-        </div>
-            </div>
-    
-    <!-- Modal de Confirmação de Senha -->
-    <div id="password-confirm-modal" class="fixed inset-0 bg-black bg-opacity-60 hidden items-center justify-center z-50">
-        <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-sm mx-4">
-            <h3 class="text-xl font-bold mb-4">Confirmar Ação </h3>
-            <p class="text-gray-600 mb-4">Para continuar, por favor, digite a senha de acesso.</p>
-            <div id="password-confirm-error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg relative mb-4 hidden" role="alert">
-                <span>Senha incorreta.</span>
-            </div>
-            <div class="mb-6">
-                <label for="confirm-password-input" class="block text-sm font-medium text-gray-700 mb-1">Senha</label>
-                <input type="password" id="confirm-password-input" class="w-full p-2 border border-gray-300 rounded-lg shadow-sm">
-            </div>
-            <div class="flex justify-end gap-4">
-                <button id="cancel-password-confirm" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400">Cancelar</button>
-                <button id="confirm-password-action" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">Confirmar</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Ligação ao ficheiro JavaScript externo (do tipo module) -->
-    <script type="module" src="script.js"></script>
-</body>
-</html>
