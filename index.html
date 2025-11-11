@@ -58,7 +58,7 @@
             }
             
             .table-header-week {
-                 background-color: #e5e7eb !important;
+                background-color: #e5e7eb !important;
                 color: black !important;
             }
 
@@ -135,7 +135,7 @@
                         </svg>
                     </button>
                     <button id="auth-btn" title="Login para Editar" class="p-2 bg-green-500 hover:bg-green-600 text-white rounded-full transition-colors">
-                        <!-- Ícone será inserido via JS -->
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
                     </button>
                 </div>
             </div>
@@ -166,7 +166,6 @@
                     <!-- Tabela da Escala -->
                     <div class="overflow-x-auto p-2">
                         <table class="w-full text-xs sm:text-sm text-center">
-                            <!-- Cabeçalho principal removido daqui -->
                             <tbody id="schedule-body"></tbody>
                         </table>
                     </div>
@@ -245,9 +244,9 @@
     </div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, getDocs, doc, getDoc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+        import { getFirestore, collection, getDocs, doc, getDoc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
         // --- INICIALIZAÇÃO FIREBASE ---
         const firebaseConfig = {
@@ -270,6 +269,8 @@
                     userId = user.uid;
                     schedulesCollection = collection(db, 'schedules');
                     resolve(true);
+                } else {
+                    authenticate();
                 }
             });
         });
@@ -278,10 +279,9 @@
             try {
                 await signInAnonymously(auth);
             } catch(error) {
-                console.error("Anonymous sign-in failed:", error);
+                console.error("Erro ao fazer login anônimo:", error);
             }
         }
-        authenticate();
 
 
         document.addEventListener('DOMContentLoaded', function() {
@@ -380,14 +380,14 @@
                 if(isLoggedIn) {
                     authBtn.innerHTML = logoutIconSVG;
                     authBtn.setAttribute('title', 'Sair');
-                    authBtn.classList.replace('bg-green-500', 'bg-red-500');
-                    authBtn.classList.replace('hover:bg-green-600', 'hover:bg-red-600');
+                    authBtn.classList.remove('bg-green-500', 'hover:bg-green-600');
+                    authBtn.classList.add('bg-red-500', 'hover:bg-red-600');
                     saveScheduleBtn.classList.remove('hidden');
                 } else {
                     authBtn.innerHTML = loginIconSVG;
                     authBtn.setAttribute('title', 'Login para Editar');
-                    authBtn.classList.replace('bg-red-500', 'bg-green-500');
-                    authBtn.classList.replace('hover:bg-red-600', 'hover:bg-green-600');
+                    authBtn.classList.remove('bg-red-500', 'hover:bg-red-600');
+                    authBtn.classList.add('bg-green-500', 'hover:bg-green-600');
                     saveScheduleBtn.classList.add('hidden');
                 }
             };
@@ -403,7 +403,11 @@
                 }
             });
 
-            cancelLoginBtn.addEventListener('click', () => { authContainer.classList.add('hidden'); authContainer.classList.remove('flex'); });
+            cancelLoginBtn.addEventListener('click', () => { 
+                authContainer.classList.add('hidden'); 
+                authContainer.classList.remove('flex'); 
+            });
+            
             loginForm.addEventListener('submit', (e) => {
                 e.preventDefault();
                 loginError.classList.add('hidden');
@@ -411,6 +415,8 @@
                     sessionStorage.setItem('escala_loggedin', 'true');
                     authContainer.classList.add('hidden');
                     authContainer.classList.remove('flex');
+                    document.getElementById('username').value = '';
+                    document.getElementById('password').value = '';
                     checkAuth();
                     renderSchedule(parseInt(yearInput.value), parseInt(monthSelect.value));
                 } else {
@@ -422,15 +428,19 @@
             tabEditor.addEventListener('click', () => {
                 editorView.classList.remove('hidden');
                 savedSchedulesView.classList.add('hidden');
-                tabEditor.classList.add('tab-active');
-                tabSaved.classList.remove('tab-active');
+                tabEditor.classList.add('tab-active', 'text-blue-600');
+                tabEditor.classList.remove('text-gray-500');
+                tabSaved.classList.remove('tab-active', 'text-blue-600');
+                tabSaved.classList.add('text-gray-500');
             });
 
             tabSaved.addEventListener('click', () => {
                 savedSchedulesView.classList.remove('hidden');
                 editorView.classList.add('hidden');
-                tabSaved.classList.add('tab-active');
-                tabEditor.classList.remove('tab-active');
+                tabSaved.classList.add('tab-active', 'text-blue-600');
+                tabSaved.classList.remove('text-gray-500');
+                tabEditor.classList.remove('tab-active', 'text-blue-600');
+                tabEditor.classList.add('text-gray-500');
                 loadSavedSchedules();
             });
 
@@ -438,7 +448,11 @@
             saveScheduleBtn.addEventListener('click', saveScheduleToFirebase);
 
             async function saveScheduleToFirebase() {
-                if (!schedulesCollection) { alert("Erro de conexão com o Firebase."); return; }
+                await authReady;
+                if (!schedulesCollection) { 
+                    alert("Erro de conexão com o Firebase."); 
+                    return; 
+                }
                 
                 try {
                     const month = parseInt(monthSelect.value);
@@ -449,8 +463,9 @@
 
                     scheduleBody.querySelectorAll('tr[data-week-num]').forEach(headerRow => {
                         const weekNum = parseInt(headerRow.dataset.weekNum);
+                        const weekNameText = headerRow.querySelector('td').childNodes[0].textContent.trim();
                         scheduleData.weeks[weekNum] = {
-                            weekName: headerRow.querySelector('td').childNodes[0].textContent.trim(),
+                            weekName: weekNameText,
                             services: []
                         };
                     });
@@ -499,9 +514,12 @@
                 const listContainer = document.getElementById('saved-schedules-list');
                 listContainer.innerHTML = '<p class="text-gray-500">Carregando...</p>';
                 try {
-                    await authReady; // Garante que o firebase está pronto
+                    await authReady;
                     const querySnapshot = await getDocs(schedulesCollection);
-                    if (querySnapshot.empty) { listContainer.innerHTML = '<p class="text-gray-500">Nenhuma escala salva.</p>'; return; }
+                    if (querySnapshot.empty) { 
+                        listContainer.innerHTML = '<p class="text-gray-500">Nenhuma escala salva.</p>'; 
+                        return; 
+                    }
                     listContainer.innerHTML = '';
                     querySnapshot.forEach((doc) => {
                         const schedule = doc.data();
@@ -522,11 +540,15 @@
                     if (isLoggedIn) {
                         listContainer.querySelectorAll('.delete-btn').forEach(b => b.addEventListener('click', (e) => deleteSchedule(e.currentTarget.dataset.id)));
                     }
-                } catch (error) { console.error("Erro ao carregar:", error); listContainer.innerHTML = '<p class="text-red-500">Erro ao carregar.</p>'; }
+                } catch (error) { 
+                    console.error("Erro ao carregar:", error); 
+                    listContainer.innerHTML = '<p class="text-red-500">Erro ao carregar.</p>'; 
+                }
             }
 
             async function loadSpecificSchedule(docId) {
                 try {
+                    await authReady;
                     const docSnap = await getDoc(doc(schedulesCollection, docId));
                     if (docSnap.exists()) {
                         const data = docSnap.data();
@@ -534,14 +556,20 @@
                         yearInput.value = data.year;
                         renderSchedule(data.year, data.month, data);
                         tabEditor.click();
-                    } else { alert("Escala não encontrada."); }
-                } catch (error) { console.error("Erro ao carregar:", error); alert("Erro ao carregar a escala."); }
+                    } else { 
+                        alert("Escala não encontrada."); 
+                    }
+                } catch (error) { 
+                    console.error("Erro ao carregar:", error); 
+                    alert("Erro ao carregar a escala."); 
+                }
             }
 
             async function deleteSchedule(docId) {
                 const performDeletion = async () => {
                     if (confirm("Tem certeza que deseja excluir esta escala permanentemente?")) {
                         try {
+                            await authReady;
                             await deleteDoc(doc(schedulesCollection, docId));
                             alert("Escala excluída com sucesso.");
                             loadSavedSchedules();
@@ -558,9 +586,10 @@
             function autoSizeSelect(element) {
                 if (!element) return;
                 const selectedOption = element.options[element.selectedIndex];
+                if (!selectedOption) return;
                 textWidthHelper.style.font = window.getComputedStyle(element).font;
                 textWidthHelper.textContent = selectedOption.text;
-                element.style.width = `${textWidthHelper.scrollWidth + 10}px`;
+                element.style.width = `${textWidthHelper.scrollWidth + 20}px`;
             }
 
             function requestPasswordConfirmation(callback) {
@@ -578,7 +607,7 @@
                 const currentText = infoDisplay.textContent;
                 const newInfo = prompt("Adicionar/Editar Informação:", currentText);
                 
-                if (newInfo !== null) { // User clicked OK
+                if (newInfo !== null) {
                     infoDisplay.textContent = newInfo.trim();
                 }
             }
@@ -586,11 +615,18 @@
             const addCultoModal = document.getElementById('add-culto-modal');
             const removeCultoModal = document.getElementById('remove-culto-modal');
             let currentWeekForModal = null;
+            
             function setupModalEvents() {
-                document.getElementById('cancel-add-culto').addEventListener('click', () => { addCultoModal.style.display = 'none'; });
-                document.getElementById('cancel-remove-culto').addEventListener('click', () => { removeCultoModal.style.display = 'none'; });
+                document.getElementById('cancel-add-culto').addEventListener('click', () => { 
+                    addCultoModal.style.display = 'none'; 
+                });
+                
+                document.getElementById('cancel-remove-culto').addEventListener('click', () => { 
+                    removeCultoModal.style.display = 'none'; 
+                });
+                
                 document.getElementById('confirm-remove-culto').addEventListener('click', () => {
-                     const performRemoval = () => {
+                    const performRemoval = () => {
                         removeCultoModal.querySelectorAll('input:checked').forEach(cb => {
                             const row = scheduleBody.querySelector(`tr[data-row-id="${cb.value}"]`);
                             if (row) row.remove();
@@ -605,9 +641,13 @@
                         removeCultoModal.style.display = 'none';
                     }
                 });
+                
                 document.getElementById('confirm-add-culto').addEventListener('click', () => {
                     const newDate = document.getElementById('new-culto-date').value;
-                    if (!newDate) { alert("Por favor, selecione uma data."); return; }
+                    if (!newDate) { 
+                        alert("Por favor, selecione uma data."); 
+                        return; 
+                    }
 
                     const dateObj = new Date(newDate + 'T00:00:00');
                     const serviceData = {
@@ -615,20 +655,31 @@
                         day: dayNames[dateObj.getDay()].toUpperCase(),
                         type: document.getElementById('new-culto-type').value,
                         info: '',
-                        portaria: 'A DEFINIR', direcao: 'A DEFINIR', preleitor: 'A DEFINIR'
+                        portaria: 'A DEFINIR / A DEFINIR', 
+                        direcao: 'A DEFINIR', 
+                        preleitor: 'A DEFINIR'
                     };
                     
                     const disabledState = isLoggedIn ? '' : 'disabled';
                     const newRow = createServiceRow(currentWeekForModal, serviceData, disabledState);
                     let lastRowInWeek = scheduleBody.querySelector(`tr[data-week-num="${currentWeekForModal}"]`);
                     scheduleBody.querySelectorAll(`tr[data-week-index="${currentWeekForModal}"]`).forEach(r => lastRowInWeek = r);
-                    lastRowInWeek.insertAdjacentElement('afterend', newRow);
+                    
+                    if (lastRowInWeek) {
+                        lastRowInWeek.insertAdjacentElement('afterend', newRow);
+                    }
 
                     newRow.querySelectorAll('select.auto-size-select').forEach(select => {
                         autoSizeSelect(select);
                         select.addEventListener('change', () => autoSizeSelect(select));
                     });
-                    newRow.querySelector('.edit-info-btn').addEventListener('click', onEditInfoClick);
+                    
+                    const editBtn = newRow.querySelector('.edit-info-btn');
+                    if (editBtn) {
+                        editBtn.addEventListener('click', onEditInfoClick);
+                    }
+                    
+                    setupPreleitorSelect(newRow);
                     
                     addCultoModal.style.display = 'none';
                 });
@@ -654,11 +705,11 @@
 
             // --- FUNÇÃO PRINCIPAL DE RENDERIZAÇÃO ---
             function createServiceRow(weekIndex, service, disabledState) {
-                 const rowId = `row-${Date.now()}-${Math.random()}`;
-                 const row = document.createElement('tr');
-                 row.className = 'border-b border-gray-200 hover:bg-gray-50';
-                 row.dataset.rowId = rowId;
-                 row.dataset.weekIndex = weekIndex;
+                const rowId = `row-${Date.now()}-${Math.random()}`;
+                const row = document.createElement('tr');
+                row.className = 'border-b border-gray-200 hover:bg-gray-50';
+                row.dataset.rowId = rowId;
+                row.dataset.weekIndex = weekIndex;
 
                 const createSelectForRole = (names, selectedValue, classes = '', role = '') => {
                     let optionsHtml = '';
@@ -684,7 +735,7 @@
                     ? service.portaria.split('/').map(s => s.trim()) 
                     : [service.portaria.trim(), 'A DEFINIR'];
                  
-                 row.innerHTML = `
+                row.innerHTML = `
                     <td class="px-2 py-1"><input type="date" class="p-1 border-0 rounded w-full date-input" value="${service.date}" data-row-id="${rowId}" ${disabledState}></td>
                     <td id="day-cell-${rowId}" class="px-2 py-1">${service.day}</td>
                     <td class="px-2 py-1 font-semibold text-blue-700 relative group">
@@ -702,118 +753,18 @@
                     </td>
                     <td class="px-1 py-1">${createSelectForRole(staffNames, service.direcao, '', 'direcao')}</td>
                     <td class="px-1 py-1">${createSelectForRole(staffNames, service.preleitor, 'font-semibold', 'preleitor')}</td>`;
-                 return row;
+                return row;
             }
 
-            function renderSchedule(year, month, scheduleData = null) {
-                scheduleBody.innerHTML = '';
-                const disabledState = isLoggedIn ? '' : 'disabled';
-                
-                const createWeekHeader = (weekIndex, weekNameText) => {
-                    const row = document.createElement('tr');
-                    row.dataset.weekNum = weekIndex;
-                    row.innerHTML = `<td colspan="6" class="bg-blue-200 text-blue-800 font-bold p-2 text-center relative">
-                        ${weekNameText}
-                        <div class="absolute right-4 top-1/2 -translate-y-1/2 flex gap-2">
-                            <button class="remove-week-culto-btn bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-700" data-week-num="${weekIndex}" ${disabledState}>-</button>
-                            <button class="add-culto-btn bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-blue-700" data-week-num="${weekIndex}" ${disabledState}>+</button>
-                        </div></td>`;
-                    
-                    const headerRow = document.createElement('tr');
-                    headerRow.innerHTML = weekHeaderHTML;
-                    
-                    scheduleBody.appendChild(row);
-                    scheduleBody.appendChild(headerRow);
-                };
-                
-                if (scheduleData && scheduleData.weeks) {
-                    scheduleData.weeks.forEach((week, weekIndex) => {
-                        createWeekHeader(weekIndex, week.weekName);
-                        if(week.services) {
-                           week.services.forEach(service => scheduleBody.appendChild(createServiceRow(weekIndex, service, disabledState)));
-                        }
-                    });
-                } else {
-                    const firstDay = new Date(year, month, 1);
-                    const daysInMonth = new Date(year, month + 1, 0).getDate();
-                    const firstDayOfWeek = firstDay.getDay();
-
-                    for (let weekIndex = 0; weekIndex < 6; weekIndex++) {
-                        const weekRows = [];
-                        cultDaysOrder.forEach(dayOfWeek => {
-                            const firstDateOfWeek = 1 + (dayOfWeek - firstDayOfWeek + 7) % 7;
-                            const day = firstDateOfWeek + (weekIndex * 7);
-
-                            if (day > 0 && day <= daysInMonth) {
-                                const date = new Date(year, month, day);
-                                let type = cultos[dayOfWeek];
-                                if (dayOfWeek === 0 && weekIndex === 1) type = "SANTA CEIA";
-                                if (dayOfWeek === 0 && weekIndex === 2) type = "CULTO DE MISSÕES";
-                                
-                                let serviceData = {
-                                    date: date.toISOString().split('T')[0],
-                                    day: dayNames[dayOfWeek].toUpperCase(), type,
-                                    info: '',
-                                    portaria: 'A DEFINIR', direcao: 'A DEFINIR', preleitor: 'A DEFINIR'
-                                };
-                                
-                                if (month === 9 && octoberData[weekIndex] && octoberData[weekIndex][dayOfWeek]) {
-                                    const data = octoberData[weekIndex][dayOfWeek];
-                                    serviceData.portaria = data.portaria;
-                                    serviceData.direcao = data.direcao;
-                                    serviceData.preleitor = data.preleitor;
-                                }
-
-                                weekRows.push(createServiceRow(weekIndex, serviceData, disabledState));
-                            }
-                        });
-                        if (weekRows.length > 0) {
-                            const name = `${weekNames[weekIndex]} SEMANA DE ${months[month].toUpperCase()}`;
-                            createWeekHeader(weekIndex, name);
-                            weekRows.forEach(row => scheduleBody.appendChild(row));
-                        }
-                    }
-                }
-                
-                // --- ADICIONAR EVENT LISTENERS DINÂMICOS ---
-                document.querySelectorAll('.date-input').forEach(i => i.addEventListener('change', (e) => {
-                    const cell = document.getElementById(`day-cell-${e.target.dataset.rowId}`);
-                    const date = new Date(e.target.value + 'T00:00:00');
-                    cell.textContent = dayNames[date.getDay()].toUpperCase();
-                }));
-                document.querySelectorAll('.add-culto-btn').forEach(b => b.addEventListener('click', (e) => {
-                    currentWeekForModal = e.currentTarget.dataset.weekNum;
-                    addCultoModal.style.display = 'flex';
-                }));
-                document.querySelectorAll('.remove-week-culto-btn').forEach(b => b.addEventListener('click', (e) => {
-                    currentWeekForModal = e.currentTarget.dataset.weekNum;
-                    const list = document.getElementById('remove-culto-list');
-                    list.innerHTML = '';
-                    scheduleBody.querySelectorAll(`tr[data-week-index="${currentWeekForModal}"]`).forEach(row => {
-                        const cells = row.querySelectorAll('td');
-                        list.innerHTML += `<label class="flex items-center gap-2"><input type="checkbox" value="${row.dataset.rowId}">${cells[2].querySelector('[data-type]').textContent} (${cells[0].querySelector('input').value})</label>`;
-                    });
-                    if (list.innerHTML === '') {
-                        list.innerHTML = '<p class="text-gray-500">Nenhum culto para remover nesta semana.</p>';
-                    }
-                    removeCultoModal.style.display = 'flex';
-                }));
-                
-                document.querySelectorAll('select.auto-size-select').forEach(select => {
-                    autoSizeSelect(select);
-                    select.addEventListener('change', () => autoSizeSelect(select));
-                });
-
-                document.querySelectorAll('.edit-info-btn').forEach(btn => {
-                    btn.addEventListener('click', onEditInfoClick);
-                });
-                
-                document.querySelectorAll('select[data-role="preleitor"]').forEach(select => {
+            function setupPreleitorSelect(container) {
+                container.querySelectorAll('select[data-role="preleitor"]').forEach(select => {
                     select.addEventListener('focus', () => {
                         select.dataset.previousValue = select.value;
                     });
+                    
                     select.addEventListener('change', (e) => {
                         const currentSelect = e.target;
+                        
                         if (currentSelect.value === '__outro__') {
                             const newName = prompt("Digite o nome do novo preleitor:");
 
@@ -825,18 +776,13 @@
                                     
                                     document.querySelectorAll('select').forEach(s => {
                                         if (s.dataset.role === 'preleitor' || s.dataset.role === 'portaria' || s.dataset.role === 'direcao') {
-                                             const newOption = new Option(trimmedName, trimmedName);
-                                             if (s.querySelector('option[value="__outro__"]')) {
-                                                s.add(newOption, s.options[s.options.length - 2]); // Antes de "Adicionar" e "Deletar"
-                                             } else {
+                                            const newOption = new Option(trimmedName, trimmedName);
+                                            if (s.querySelector('option[value="__outro__"]')) {
+                                                const otherOption = s.querySelector('option[value="__outro__"]');
+                                                s.insertBefore(newOption, otherOption);
+                                            } else {
                                                 s.add(newOption);
-                                                // Re-sort options se não for preleitor
-                                                if (s.dataset.role !== 'preleitor') {
-                                                    Array.from(s.options)
-                                                        .sort((a, b) => a.text.localeCompare(b.text))
-                                                        .forEach(option => s.add(option));
-                                                }
-                                             }
+                                            }
                                         }
                                     });
                                 }
@@ -873,12 +819,12 @@
                             
                             const index = staffNames.indexOf(trimmedName);
                             if (index > -1) {
-                                staffNames.splice(index, 1); // Remove from master list
+                                staffNames.splice(index, 1);
                                 
                                 document.querySelectorAll('select[data-role="portaria"], select[data-role="direcao"], select[data-role="preleitor"]').forEach(s => {
                                     const optionToRemove = s.querySelector(`option[value="${trimmedName}"]`);
                                     if (optionToRemove) {
-                                        s.remove(optionToRemove.index);
+                                        optionToRemove.remove();
                                     }
                                 });
                                 
@@ -890,9 +836,131 @@
                                 currentSelect.value = currentSelect.dataset.previousValue || 'A DEFINIR';
                                 autoSizeSelect(currentSelect);
                             }
+                        } else {
+                            autoSizeSelect(currentSelect);
                         }
                     });
                 });
+            }
+
+            function renderSchedule(year, month, scheduleData = null) {
+                scheduleBody.innerHTML = '';
+                const disabledState = isLoggedIn ? '' : 'disabled';
+                
+                const createWeekHeader = (weekIndex, weekNameText) => {
+                    const row = document.createElement('tr');
+                    row.dataset.weekNum = weekIndex;
+                    row.innerHTML = `<td colspan="6" class="bg-blue-200 text-blue-800 font-bold p-2 text-center relative">
+                        ${weekNameText}
+                        <div class="absolute right-4 top-1/2 -translate-y-1/2 flex gap-2">
+                            <button class="remove-week-culto-btn bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-700" data-week-num="${weekIndex}" ${disabledState}>-</button>
+                            <button class="add-culto-btn bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-blue-700" data-week-num="${weekIndex}" ${disabledState}>+</button>
+                        </div></td>`;
+                    
+                    const headerRow = document.createElement('tr');
+                    headerRow.innerHTML = weekHeaderHTML;
+                    
+                    scheduleBody.appendChild(row);
+                    scheduleBody.appendChild(headerRow);
+                };
+                
+                if (scheduleData && scheduleData.weeks) {
+                    scheduleData.weeks.forEach((week, weekIndex) => {
+                        createWeekHeader(weekIndex, week.weekName);
+                        if(week.services) {
+                            week.services.forEach(service => {
+                                const row = createServiceRow(weekIndex, service, disabledState);
+                                scheduleBody.appendChild(row);
+                            });
+                        }
+                    });
+                } else {
+                    const firstDay = new Date(year, month, 1);
+                    const daysInMonth = new Date(year, month + 1, 0).getDate();
+                    const firstDayOfWeek = firstDay.getDay();
+
+                    for (let weekIndex = 0; weekIndex < 6; weekIndex++) {
+                        const weekRows = [];
+                        cultDaysOrder.forEach(dayOfWeek => {
+                            const firstDateOfWeek = 1 + (dayOfWeek - firstDayOfWeek + 7) % 7;
+                            const day = firstDateOfWeek + (weekIndex * 7);
+
+                            if (day > 0 && day <= daysInMonth) {
+                                const date = new Date(year, month, day);
+                                let type = cultos[dayOfWeek];
+                                if (dayOfWeek === 0 && weekIndex === 1) type = "SANTA CEIA";
+                                if (dayOfWeek === 0 && weekIndex === 2) type = "CULTO DE MISSÕES";
+                                
+                                let serviceData = {
+                                    date: date.toISOString().split('T')[0],
+                                    day: dayNames[dayOfWeek].toUpperCase(), 
+                                    type,
+                                    info: '',
+                                    portaria: 'A DEFINIR / A DEFINIR', 
+                                    direcao: 'A DEFINIR', 
+                                    preleitor: 'A DEFINIR'
+                                };
+                                
+                                if (month === 9 && year === 2024 && octoberData[weekIndex] && octoberData[weekIndex][dayOfWeek]) {
+                                    const data = octoberData[weekIndex][dayOfWeek];
+                                    serviceData.portaria = data.portaria;
+                                    serviceData.direcao = data.direcao;
+                                    serviceData.preleitor = data.preleitor;
+                                }
+
+                                weekRows.push(createServiceRow(weekIndex, serviceData, disabledState));
+                            }
+                        });
+                        
+                        if (weekRows.length > 0) {
+                            const name = `${weekNames[weekIndex]} SEMANA DE ${months[month].toUpperCase()}`;
+                            createWeekHeader(weekIndex, name);
+                            weekRows.forEach(row => scheduleBody.appendChild(row));
+                        }
+                    }
+                }
+                
+                // --- ADICIONAR EVENT LISTENERS DINÂMICOS ---
+                document.querySelectorAll('.date-input').forEach(i => i.addEventListener('change', (e) => {
+                    const cell = document.getElementById(`day-cell-${e.target.dataset.rowId}`);
+                    if (!cell) return;
+                    const date = new Date(e.target.value + 'T00:00:00');
+                    cell.textContent = dayNames[date.getDay()].toUpperCase();
+                }));
+                
+                document.querySelectorAll('.add-culto-btn').forEach(b => b.addEventListener('click', (e) => {
+                    currentWeekForModal = e.currentTarget.dataset.weekNum;
+                    addCultoModal.style.display = 'flex';
+                }));
+                
+                document.querySelectorAll('.remove-week-culto-btn').forEach(b => b.addEventListener('click', (e) => {
+                    currentWeekForModal = e.currentTarget.dataset.weekNum;
+                    const list = document.getElementById('remove-culto-list');
+                    list.innerHTML = '';
+                    scheduleBody.querySelectorAll(`tr[data-week-index="${currentWeekForModal}"]`).forEach(row => {
+                        const cells = row.querySelectorAll('td');
+                        const typeElement = cells[2].querySelector('[data-type]');
+                        const dateInput = cells[0].querySelector('input');
+                        if (typeElement && dateInput) {
+                            list.innerHTML += `<label class="flex items-center gap-2"><input type="checkbox" value="${row.dataset.rowId}">${typeElement.textContent} (${dateInput.value})</label>`;
+                        }
+                    });
+                    if (list.innerHTML === '') {
+                        list.innerHTML = '<p class="text-gray-500">Nenhum culto para remover nesta semana.</p>'; 
+                    }
+                    removeCultoModal.style.display = 'flex';
+                }));
+                
+                document.querySelectorAll('select.auto-size-select').forEach(select => {
+                    autoSizeSelect(select);
+                    select.addEventListener('change', () => autoSizeSelect(select));
+                });
+
+                document.querySelectorAll('.edit-info-btn').forEach(btn => {
+                    btn.addEventListener('click', onEditInfoClick);
+                });
+                
+                setupPreleitorSelect(document);
             }
 
             // --- INICIALIZAÇÃO DA PÁGINA ---
@@ -906,7 +974,7 @@
                 monthSelect.value = currentMonth;
                 yearInput.value = currentYear;
                 
-                await authReady; // Espera a autenticação do Firebase
+                await authReady;
                 
                 const scheduleId = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
                 let savedData = null;
@@ -934,6 +1002,7 @@
 
                     if (schedulesCollection) {
                         try {
+                            await authReady;
                             const docRef = doc(schedulesCollection, scheduleId);
                             const docSnap = await getDoc(docRef);
                             if (docSnap.exists()) {
@@ -955,4 +1024,3 @@
     </script>
 </body>
 </html>
-
