@@ -865,48 +865,52 @@
                            week.services.forEach(service => scheduleBody.appendChild(createServiceRow(weekIndex, service, disabledState)));
                         }
                     });
-                } else {
-                    const firstDay = new Date(year, month, 1);
-                    const daysInMonth = new Date(year, month + 1, 0).getDate();
-                    const firstDayOfWeek = firstDay.getDay();
+               } else {
+    const firstDay = new Date(year, month, 1);
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const firstDayOfWeek = firstDay.getDay();
 
-                    for (let weekIndex = 0; weekIndex < 6; weekIndex++) {
-                        const weekRows = [];
-                        // A ordem já está correta: [0, 3, 5] - DOMINGO, QUARTA, SEXTA
-                        cultDaysOrder.forEach(dayOfWeek => {
-                            const firstDateOfWeek = 1 + (dayOfWeek - firstDayOfWeek + 7) % 7;
-                            const day = firstDateOfWeek + (weekIndex * 7);
+    for (let weekIndex = 0; weekIndex < 6; weekIndex++) {
+        const weekRows = [];
+        
+        // GARANTIR que DOMINGO vem primeiro - ordenar explicitamente
+        const orderedDays = [...cultDaysOrder].sort((a, b) => cultDaysOrder.indexOf(a) - cultDaysOrder.indexOf(b));
+        
+        orderedDays.forEach(dayOfWeek => {
+            const firstDateOfWeek = 1 + (dayOfWeek - firstDayOfWeek + 7) % 7;
+            const day = firstDateOfWeek + (weekIndex * 7);
 
-                            if (day > 0 && day <= daysInMonth) {
-                                const date = new Date(year, month, day);
-                                let type = cultos[dayOfWeek];
-                                if (dayOfWeek === 0 && weekIndex === 1) type = "SANTA CEIA";
-                                if (dayOfWeek === 0 && weekIndex === 2) type = "CULTO DE MISSÕES";
-                                
-                                let serviceData = {
-                                    date: date.toISOString().split('T')[0],
-                                    day: dayNames[dayOfWeek].toUpperCase(), type,
-                                    info: '',
-                                    portaria: 'A DEFINIR', direcao: 'A DEFINIR', preleitor: 'A DEFINIR'
-                                };
-                                
-                                if (month === 9 && octoberData[weekIndex] && octoberData[weekIndex][dayOfWeek]) {
-                                    const data = octoberData[weekIndex][dayOfWeek];
-                                    serviceData.portaria = data.portaria;
-                                    serviceData.direcao = data.direcao;
-                                    serviceData.preleitor = data.preleitor;
-                                }
-
-                                weekRows.push(createServiceRow(weekIndex, serviceData, disabledState));
-                            }
-                        });
-                        if (weekRows.length > 0) {
-                            const name = `${weekNames[weekIndex]} SEMANA DE ${months[month].toUpperCase()}`;
-                            createWeekHeader(weekIndex, name);
-                            weekRows.forEach(row => scheduleBody.appendChild(row));
-                        }
-                    }
+            if (day > 0 && day <= daysInMonth) {
+                const date = new Date(year, month, day);
+                let type = cultos[dayOfWeek];
+                if (dayOfWeek === 0 && weekIndex === 1) type = "SANTA CEIA";
+                if (dayOfWeek === 0 && weekIndex === 2) type = "CULTO DE MISSÕES";
+                
+                let serviceData = {
+                    date: date.toISOString().split('T')[0],
+                    day: dayNames[dayOfWeek].toUpperCase(), type,
+                    info: '',
+                    portaria: 'A DEFINIR', direcao: 'A DEFINIR', preleitor: 'A DEFINIR'
+                };
+                
+                if (month === 9 && octoberData[weekIndex] && octoberData[weekIndex][dayOfWeek]) {
+                    const data = octoberData[weekIndex][dayOfWeek];
+                    serviceData.portaria = data.portaria;
+                    serviceData.direcao = data.direcao;
+                    serviceData.preleitor = data.preleitor;
                 }
+
+                weekRows.push(createServiceRow(weekIndex, serviceData, disabledState));
+            }
+        });
+        
+        if (weekRows.length > 0) {
+            const name = `${weekNames[weekIndex]} SEMANA DE ${months[month].toUpperCase()}`;
+            createWeekHeader(weekIndex, name);
+            weekRows.forEach(row => scheduleBody.appendChild(row));
+        }
+    }
+}
                 
                 // --- ADICIONAR EVENT LISTENERS DINÂMICOS ---
                 document.querySelectorAll('.date-input').forEach(i => i.addEventListener('change', (e) => {
