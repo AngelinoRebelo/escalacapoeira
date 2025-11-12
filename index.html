@@ -23,66 +23,197 @@
             background-image: none;
         }
 
-        @media print {
-            body {
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-                background-color: white;
-            }
+       @media print {
+    body {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+        background-color: white;
+        font-size: 10pt;
+        line-height: 1.2;
+    }
 
-            #header-buttons, #auth-container, .border-b, footer, .remove-week-culto-btn, .add-culto-btn, #add-culto-modal, #remove-culto-modal, #tab-saved, #password-confirm-modal {
-                display: none !important;
-            }
+    #header-buttons, #auth-container, .border-b, footer, 
+    .remove-week-culto-btn, .add-culto-btn, #add-culto-modal, 
+    #remove-culto-modal, #tab-saved, #password-confirm-modal {
+        display: none !important;
+    }
 
-            body, #main-content, #main-content > div {
-                padding: 0;
-                margin: 0;
-            }
-            
-            #main-content > div {
-                max-width: 100% !important;
-            }
+    body, #main-content, #main-content > div {
+        padding: 0 !important;
+        margin: 0 !important;
+        width: 100% !important;
+    }
+    
+    #main-content > div {
+        max-width: 100% !important;
+        box-shadow: none !important;
+    }
 
-            .shadow-md, .rounded-t-lg, .rounded-b-lg {
-                box-shadow: none !important;
-                border-radius: 0 !important;
-            }
-            
-            .bg-blue-500 {
-                background-color: #e5e7eb !important;
-                color: black !important;
-            }
-            .bg-blue-200 {
-                background-color: #f3f4f6 !important;
-                color: black !important;
-            }
-            
-            .table-header-week {
-                 background-color: #e5e7eb !important;
-                color: black !important;
-            }
+    /* Remove sombras e bordas arredondadas */
+    .shadow-md, .rounded-t-lg, .rounded-b-lg, .rounded-lg {
+        box-shadow: none !important;
+        border-radius: 0 !important;
+        border: none !important;
+    }
+    
+    /* Melhora a aparência dos cabeçalhos */
+    .bg-blue-500 {
+        background-color: #d1d5db !important; /* cinza mais claro */
+        color: black !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
 
-            input, select {
-                border: none !important;
-                background-color: transparent !important;
-                box-shadow: none !important;
-                padding: 1px;
-            }
+    .bg-blue-200 {
+        background-color: #e5e7eb !important;
+        color: black !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+    
+    .table-header-week {
+        background-color: #f3f4f6 !important;
+        color: black !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+        border-bottom: 1px solid #9ca3af !important;
+    }
 
-            .auto-size-select {
-                width: auto !important;
-                display: inline-block;
-            }
+    /* Remove bordas e fundos de inputs */
+    input, select {
+        border: none !important;
+        background-color: transparent !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        appearance: none !important;
+        -webkit-appearance: none !important;
+        -moz-appearance: none !important;
+    }
 
-            @page {
-                size: A4 landscape;
-                margin: 15mm;
-            }
+    /* Ajusta selects para impressão */
+    .auto-size-select {
+        width: auto !important;
+        display: inline-block !important;
+        border: none !important;
+        background: transparent !important;
+        font-size: 9pt !important;
+    }
 
-            table {
-                font-size: 10pt;
-            }
-        }
+    /* Ajusta a tabela */
+    table {
+        font-size: 9pt !important;
+        width: 100% !important;
+        border-collapse: collapse !important;
+    }
+
+    th, td {
+        padding: 2px 4px !important;
+        border: 1px solid #d1d5db !important;
+        vertical-align: middle !important;
+    }
+
+    /* Remove hover effects */
+    .hover\:bg-gray-50:hover, .hover\:bg-blue-700:hover, 
+    .hover\:bg-green-600:hover, .hover\:bg-red-600:hover,
+    .hover\:bg-gray-400:hover, .hover\:bg-blue-600:hover {
+        background-color: transparent !important;
+    }
+
+    /* Ajusta o cabeçalho principal */
+    .bg-blue-600 {
+        background-color: #e5e7eb !important;
+        color: black !important;
+        padding: 8px !important;
+        margin-bottom: 5px !important;
+    }
+
+    /* Remove grupos e botões de edição */
+    .group, .edit-info-btn, .absolute {
+        display: none !important;
+    }
+
+    /* Ajusta informações adicionais */
+    [data-info-display] {
+        font-size: 8pt !important;
+        color: #6b7280 !important;
+        margin-top: 1px !important;
+    }
+
+    /* Remove flex containers em células */
+    .flex {
+        display: block !important;
+    }
+
+    .flex-col {
+        display: block !important;
+    }
+
+    .gap-1, .gap-2 {
+        gap: 0 !important;
+    }
+
+    /* Ajusta células de portaria */
+    td:has(.flex-col) {
+        padding: 1px 2px !important;
+    }
+
+    /* Remove espaçamentos excessivos */
+    .p-2, .p-4, .p-6, .p-8 {
+        padding: 4px !important;
+    }
+
+    .py-4, .py-2, .py-1 {
+        padding-top: 2px !important;
+        padding-bottom: 2px !important;
+    }
+
+    .px-2, .px-1 {
+        padding-left: 3px !important;
+        padding-right: 3px !important;
+    }
+
+    .my-4, .mb-4, .mb-6 {
+        margin: 5px 0 !important;
+    }
+
+    /* Configuração da página */
+    @page {
+        size: A4 landscape;
+        margin: 10mm;
+    }
+
+    /* Garante que não haja quebras de página dentro das semanas */
+    tr {
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
+
+    /* Ajusta font weights para melhor legibilidade na impressão */
+    .font-bold {
+        font-weight: 600 !important;
+    }
+
+    .font-semibold {
+        font-weight: 500 !important;
+    }
+
+    /* Remove cores azuis muito claras */
+    .text-blue-700 {
+        color: black !important;
+    }
+
+    /* Ajusta inputs de data */
+    .date-input {
+        font-size: 8pt !important;
+        width: 85px !important;
+    }
+
+    /* Remove qualquer opacidade */
+    .opacity-0, .group-hover\:opacity-100 {
+        opacity: 1 !important;
+    }
+}
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800">
