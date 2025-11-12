@@ -23,7 +23,7 @@
             background-image: none;
         }
 
-       @media print {
+      @media print {
     body {
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
@@ -58,7 +58,7 @@
     
     /* Melhora a aparência dos cabeçalhos */
     .bg-blue-500 {
-        background-color: #d1d5db !important; /* cinza mais claro */
+        background-color: #d1d5db !important;
         color: black !important;
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
@@ -79,8 +79,45 @@
         border-bottom: 1px solid #9ca3af !important;
     }
 
+    /* A SOLUÇÃO: Esconde os selects e mostra apenas os valores */
+    select {
+        display: none !important;
+    }
+    
+    /* Mostra os valores dos selects como texto simples */
+    td:has(select) {
+        position: relative;
+    }
+    
+    td:has(select)::after {
+        content: attr(data-print-value);
+        display: block;
+        font-size: 9pt;
+        text-align: center;
+    }
+    
+    /* Para células com múltiplos selects (portaria) */
+    td.flex-col::after {
+        content: none !important;
+    }
+    
+    td.flex-col {
+        display: block !important;
+    }
+    
+    .flex-col select:first-child::after {
+        content: attr(data-print-value);
+        display: block;
+    }
+    
+    .flex-col select:last-child::after {
+        content: attr(data-print-value);
+        display: block;
+        margin-top: 2px;
+    }
+
     /* Remove bordas e fundos de inputs */
-    input, select {
+    input {
         border: none !important;
         background-color: transparent !important;
         box-shadow: none !important;
@@ -91,41 +128,11 @@
         -moz-appearance: none !important;
     }
 
-    /* Ajusta selects para impressão */
-    .auto-size-select {
-        width: auto !important;
+    /* Ajusta inputs para mostrar valores */
+    input[type="date"] {
         display: inline-block !important;
-        border: none !important;
-        background: transparent !important;
+        width: auto !important;
         font-size: 9pt !important;
-    }
-
-    /* Ajusta a tabela */
-    table {
-        font-size: 9pt !important;
-        width: 100% !important;
-        border-collapse: collapse !important;
-    }
-
-    th, td {
-        padding: 2px 4px !important;
-        border: 1px solid #d1d5db !important;
-        vertical-align: middle !important;
-    }
-
-    /* Remove hover effects */
-    .hover\:bg-gray-50:hover, .hover\:bg-blue-700:hover, 
-    .hover\:bg-green-600:hover, .hover\:bg-red-600:hover,
-    .hover\:bg-gray-400:hover, .hover\:bg-blue-600:hover {
-        background-color: transparent !important;
-    }
-
-    /* Ajusta o cabeçalho principal */
-    .bg-blue-600 {
-        background-color: #e5e7eb !important;
-        color: black !important;
-        padding: 8px !important;
-        margin-bottom: 5px !important;
     }
 
     /* Remove grupos e botões de edição */
@@ -201,12 +208,6 @@
     /* Remove cores azuis muito claras */
     .text-blue-700 {
         color: black !important;
-    }
-
-    /* Ajusta inputs de data */
-    .date-input {
-        font-size: 8pt !important;
-        width: 85px !important;
     }
 
     /* Remove qualquer opacidade */
