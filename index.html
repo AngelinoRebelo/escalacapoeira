@@ -811,32 +811,32 @@
             }
 
             // --- FUNÇÃO PRINCIPAL DE RENDERIZAÇÃO ---
-            function createServiceRow(weekIndex, service, disabledState) {
-    const rowId = `row-${Date.now()}-${Math.random()}`;
-    const row = document.createElement('tr');
-    row.className = 'border-b border-gray-200 hover:bg-gray-50';
-    row.dataset.rowId = rowId;
-    row.dataset.weekIndex = weekIndex;
+           function createServiceRow(weekIndex, service, disabledState) {
+                 const rowId = `row-${Date.now()}-${Math.random()}`;
+                 const row = document.createElement('tr');
+                 row.className = 'border-b border-gray-200 hover:bg-gray-50';
+                 row.dataset.rowId = rowId;
+                 row.dataset.weekIndex = weekIndex;
 
-    const createSelectForRole = (names, selectedValue, classes = '', role = '') => {
-        let optionsHtml = '';
-        const nameSet = new Set(names);
-        if (selectedValue && !nameSet.has(selectedValue)) {
-            nameSet.add(selectedValue);
-        }
-        const sortedNames = [...nameSet].sort();
+                const createSelectForRole = (names, selectedValue, classes = '', role = '') => {
+                    let optionsHtml = '';
+                    const nameSet = new Set(names);
+                    if (selectedValue && !nameSet.has(selectedValue)) {
+                        nameSet.add(selectedValue);
+                    }
+                    const sortedNames = [...nameSet].sort();
 
-        for (const name of sortedNames) {
-            optionsHtml += `<option value="${name}" ${name === selectedValue ? 'selected' : ''}>${name}</option>`;
-        }
+                    for (const name of sortedNames) {
+                        optionsHtml += `<option value="${name}" ${name === selectedValue ? 'selected' : ''}>${name}</option>`;
+                    }
 
-        if (role === 'preleitor') {
-            optionsHtml += `<option value="__outro__" class="italic text-blue-600">+ Cadastrar preleitor...</option>`;
-            optionsHtml += `<option value="__deletar__" class="italic text-red-600">- Deletar preleitor...</option>`;
-        }
+                    if (role === 'preleitor') {
+                        optionsHtml += `<option value="__outro__" class="italic text-blue-600">+ Cadastrar preleitor...</option>`;
+                        optionsHtml += `<option value="__deletar__" class="italic text-red-600">- Deletar preleitor...</option>`;
+                    }
 
-        return `<select data-role="${role}" class="p-1 border-0 rounded w-full text-center auto-size-select ${classes}" ${disabledState}>${optionsHtml}</select>`;
-    };
+                    return `<select data-role="${role}" class="p-1 border-0 rounded w-full text-center auto-size-select ${classes}" ${disabledState}>${optionsHtml}</select>`;
+                };
     
     const portariaParts = service.portaria.includes('/') 
         ? service.portaria.split('/').map(s => s.trim()) 
