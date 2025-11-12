@@ -415,7 +415,6 @@
         }
         authenticate();
 
-
         document.addEventListener('DOMContentLoaded', function() {
             // --- ELEMENTOS DO DOM ---
             const authContainer = document.getElementById('auth-container');
@@ -499,6 +498,37 @@
                     <th class="px-2 py-2">Preleitor</th>
                 </tr>`;
 
+            // --- FUNÇÃO PARA ATUALIZAR VALORES DE IMPRESSÃO ---
+            function updatePrintValues() {
+                document.querySelectorAll('tr[data-row-id]').forEach(row => {
+                    const cells = row.querySelectorAll('td');
+                    
+                    // Célula de portaria (dois selects)
+                    const portariaCell = cells[3];
+                    const portariaSelects = portariaCell.querySelectorAll('select');
+                    if (portariaSelects.length === 2) {
+                        const value1 = portariaSelects[0].options[portariaSelects[0].selectedIndex].text;
+                        const value2 = portariaSelects[1].options[portariaSelects[1].selectedIndex].text;
+                        portariaCell.setAttribute('data-print-value', `${value1} / ${value2}`);
+                    }
+                    
+                    // Célula de direção (um select)
+                    const direcaoCell = cells[4];
+                    const direcaoSelect = direcaoCell.querySelector('select');
+                    if (direcaoSelect) {
+                        const value = direcaoSelect.options[direcaoSelect.selectedIndex].text;
+                        direcaoCell.setAttribute('data-print-value', value);
+                    }
+                    
+                    // Célula de preleitor (um select)
+                    const preleitorCell = cells[5];
+                    const preleitorSelect = preleitorCell.querySelector('select');
+                    if (preleitorSelect) {
+                        const value = preleitorSelect.options[preleitorSelect.selectedIndex].text;
+                        preleitorCell.setAttribute('data-print-value', value);
+                    }
+                });
+            }
 
             // --- LÓGICA DE AUTENTICAÇÃO E BOTÕES ---
             printBtn.addEventListener('click', () => window.print());
@@ -631,7 +661,7 @@
                 const listContainer = document.getElementById('saved-schedules-list');
                 listContainer.innerHTML = '<p class="text-gray-500">Carregando...</p>';
                 try {
-                    await authReady; // Garante que o firebase está pronto
+                    await authReady;
                     const querySnapshot = await getDocs(schedulesCollection);
                     if (querySnapshot.empty) { listContainer.innerHTML = '<p class="text-gray-500">Nenhuma escala salva.</p>'; return; }
                     listContainer.innerHTML = '';
@@ -710,7 +740,7 @@
                 const currentText = infoDisplay.textContent;
                 const newInfo = prompt("Adicionar/Editar Informação:", currentText);
                 
-                if (newInfo !== null) { // User clicked OK
+                if (newInfo !== null) {
                     infoDisplay.textContent = newInfo.trim();
                 }
             }
@@ -758,10 +788,14 @@
 
                     newRow.querySelectorAll('select.auto-size-select').forEach(select => {
                         autoSizeSelect(select);
-                        select.addEventListener('change', () => autoSizeSelect(select));
+                        select.addEventListener('change', () => {
+                            autoSizeSelect(select);
+                            updatePrintValues();
+                        });
                     });
                     newRow.querySelector('.edit-info-btn').addEventListener('click', onEditInfoClick);
                     
+                    updatePrintValues();
                     addCultoModal.style.display = 'none';
                 });
 
@@ -828,12 +862,16 @@
                             </svg>
                         </button>
                     </td>
-                    <td class="px-1 py-1 flex flex-col gap-1 items-center justify-center">
+                    <td class="px-1 py-1 flex flex-col gap-1 items-center justify-center" data-print-value="${portariaParts[0]} / ${portariaParts[1]}">
                         ${createSelectForRole(staffNames, portariaParts[0], '', 'portaria')}
                         ${createSelectForRole(staffNames, portariaParts[1], '', 'portaria')}
                     </td>
-                    <td class="px-1 py-1">${createSelectForRole(staffNames, service.direcao, '', 'direcao')}</td>
-                    <td class="px-1 py-1">${createSelectForRole(staffNames, service.preleitor, 'font-semibold', 'preleitor')}</td>`;
+                    <td class="px-1 py-1" data-print-value="${service.direcao}">
+                        ${createSelectForRole(staffNames, service.direcao, '', 'direcao')}
+                    </td>
+                    <td class="px-1 py-1" data-print-value="${service.preleitor}">
+                        ${createSelectForRole(staffNames, service.preleitor, 'font-semibold', 'preleitor')}
+                    </td>`;
                  return row;
             }
 
@@ -907,6 +945,9 @@
                     }
                 }
                 
+                // --- ATUALIZA OS VALORES DE IMPRESSÃO APÓS RENDERIZAR ---
+                updatePrintValues();
+                
                 // --- ADICIONAR EVENT LISTENERS DINÂMICOS ---
                 document.querySelectorAll('.date-input').forEach(i => i.addEventListener('change', (e) => {
                     const cell = document.getElementById(`day-cell-${e.target.dataset.rowId}`);
@@ -933,7 +974,10 @@
                 
                 document.querySelectorAll('select.auto-size-select').forEach(select => {
                     autoSizeSelect(select);
-                    select.addEventListener('change', () => autoSizeSelect(select));
+                    select.addEventListener('change', () => {
+                        autoSizeSelect(select);
+                        updatePrintValues();
+                    });
                 });
 
                 document.querySelectorAll('.edit-info-btn').forEach(btn => {
@@ -959,10 +1003,9 @@
                                         if (s.dataset.role === 'preleitor' || s.dataset.role === 'portaria' || s.dataset.role === 'direcao') {
                                              const newOption = new Option(trimmedName, trimmedName);
                                              if (s.querySelector('option[value="__outro__"]')) {
-                                                s.add(newOption, s.options[s.options.length - 2]); // Antes de "Adicionar" e "Deletar"
+                                                s.add(newOption, s.options[s.options.length - 2]);
                                              } else {
                                                 s.add(newOption);
-                                                // Re-sort options se não for preleitor
                                                 if (s.dataset.role !== 'preleitor') {
                                                     Array.from(s.options)
                                                         .sort((a, b) => a.text.localeCompare(b.text))
@@ -974,6 +1017,7 @@
                                 }
                                 currentSelect.value = trimmedName;
                                 autoSizeSelect(currentSelect);
+                                updatePrintValues();
                             } else {
                                 currentSelect.value = currentSelect.dataset.previousValue || 'A DEFINIR';
                                 autoSizeSelect(currentSelect);
@@ -1005,7 +1049,7 @@
                             
                             const index = staffNames.indexOf(trimmedName);
                             if (index > -1) {
-                                staffNames.splice(index, 1); // Remove from master list
+                                staffNames.splice(index, 1);
                                 
                                 document.querySelectorAll('select[data-role="portaria"], select[data-role="direcao"], select[data-role="preleitor"]').forEach(s => {
                                     const optionToRemove = s.querySelector(`option[value="${trimmedName}"]`);
@@ -1017,11 +1061,14 @@
                                 alert(`"${trimmedName}" foi removido com sucesso.`);
                                 currentSelect.value = 'A DEFINIR';
                                 autoSizeSelect(currentSelect);
+                                updatePrintValues();
                             } else {
                                 alert(`Nome "${trimmedName}" não encontrado na lista de nomes cadastrados.`);
                                 currentSelect.value = currentSelect.dataset.previousValue || 'A DEFINIR';
                                 autoSizeSelect(currentSelect);
                             }
+                        } else {
+                            updatePrintValues();
                         }
                     });
                 });
@@ -1038,7 +1085,7 @@
                 monthSelect.value = currentMonth;
                 yearInput.value = currentYear;
                 
-                await authReady; // Espera a autenticação do Firebase
+                await authReady;
                 
                 const scheduleId = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
                 let savedData = null;
@@ -1087,4 +1134,3 @@
     </script>
 </body>
 </html>
-
