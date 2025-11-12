@@ -23,7 +23,7 @@
             background-image: none;
         }
 
-     @media print {
+      @media print {
     body {
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
@@ -79,9 +79,41 @@
         border-bottom: 1px solid #9ca3af !important;
     }
 
-    /* SOLUÇÃO SIMPLIFICADA: Esconde todos os elementos interativos */
-    select, .edit-info-btn, .remove-week-culto-btn, .add-culto-btn {
+    /* A SOLUÇÃO: Esconde os selects e mostra apenas os valores */
+    select {
         display: none !important;
+    }
+    
+    /* Mostra os valores dos selects como texto simples */
+    td:has(select) {
+        position: relative;
+    }
+    
+    td:has(select)::after {
+        content: attr(data-print-value);
+        display: block;
+        font-size: 9pt;
+        text-align: center;
+    }
+    
+    /* Para células com múltiplos selects (portaria) */
+    td.flex-col::after {
+        content: none !important;
+    }
+    
+    td.flex-col {
+        display: block !important;
+    }
+    
+    .flex-col select:first-child::after {
+        content: attr(data-print-value);
+        display: block;
+    }
+    
+    .flex-col select:last-child::after {
+        content: attr(data-print-value);
+        display: block;
+        margin-top: 2px;
     }
 
     /* Remove bordas e fundos de inputs */
@@ -104,7 +136,7 @@
     }
 
     /* Remove grupos e botões de edição */
-    .group, .absolute {
+    .group, .edit-info-btn, .absolute {
         display: none !important;
     }
 
@@ -122,34 +154,10 @@
 
     .flex-col {
         display: block !important;
-        position: relative;
     }
 
     .gap-1, .gap-2 {
         gap: 0 !important;
-    }
-
-    /* Ajusta células com selects - MOSTRA OS VALORES */
-    td.print-portaria::after {
-        content: attr(data-print-value);
-        display: block;
-        font-size: 9pt;
-        text-align: center;
-    }
-
-    td.print-direcao::after {
-        content: attr(data-print-value);
-        display: block;
-        font-size: 9pt;
-        text-align: center;
-    }
-
-    td.print-preleitor::after {
-        content: attr(data-print-value);
-        display: block;
-        font-size: 9pt;
-        text-align: center;
-        font-weight: 500;
     }
 
     /* Ajusta células de portaria */
@@ -407,6 +415,7 @@
         }
         authenticate();
 
+
         document.addEventListener('DOMContentLoaded', function() {
             // --- ELEMENTOS DO DOM ---
             const authContainer = document.getElementById('auth-container');
@@ -490,37 +499,6 @@
                     <th class="px-2 py-2">Preleitor</th>
                 </tr>`;
 
-            // --- FUNÇÃO PARA ATUALIZAR VALORES DE IMPRESSÃO ---
-            function updatePrintValues() {
-                document.querySelectorAll('tr[data-row-id]').forEach(row => {
-                    const cells = row.querySelectorAll('td');
-                    
-                    // Célula de portaria (dois selects)
-                    const portariaCell = cells[3];
-                    const portariaSelects = portariaCell.querySelectorAll('select');
-                    if (portariaSelects.length === 2) {
-                        const value1 = portariaSelects[0].options[portariaSelects[0].selectedIndex].text;
-                        const value2 = portariaSelects[1].options[portariaSelects[1].selectedIndex].text;
-                        portariaCell.setAttribute('data-print-value', `${value1} / ${value2}`);
-                    }
-                    
-                    // Célula de direção (um select)
-                    const direcaoCell = cells[4];
-                    const direcaoSelect = direcaoCell.querySelector('select');
-                    if (direcaoSelect) {
-                        const value = direcaoSelect.options[direcaoSelect.selectedIndex].text;
-                        direcaoCell.setAttribute('data-print-value', value);
-                    }
-                    
-                    // Célula de preleitor (um select)
-                    const preleitorCell = cells[5];
-                    const preleitorSelect = preleitorCell.querySelector('select');
-                    if (preleitorSelect) {
-                        const value = preleitorSelect.options[preleitorSelect.selectedIndex].text;
-                        preleitorCell.setAttribute('data-print-value', value);
-                    }
-                });
-            }
 
             // --- LÓGICA DE AUTENTICAÇÃO E BOTÕES ---
             printBtn.addEventListener('click', () => window.print());
@@ -653,7 +631,7 @@
                 const listContainer = document.getElementById('saved-schedules-list');
                 listContainer.innerHTML = '<p class="text-gray-500">Carregando...</p>';
                 try {
-                    await authReady;
+                    await authReady; // Garante que o firebase está pronto
                     const querySnapshot = await getDocs(schedulesCollection);
                     if (querySnapshot.empty) { listContainer.innerHTML = '<p class="text-gray-500">Nenhuma escala salva.</p>'; return; }
                     listContainer.innerHTML = '';
@@ -732,7 +710,7 @@
                 const currentText = infoDisplay.textContent;
                 const newInfo = prompt("Adicionar/Editar Informação:", currentText);
                 
-                if (newInfo !== null) {
+                if (newInfo !== null) { // User clicked OK
                     infoDisplay.textContent = newInfo.trim();
                 }
             }
@@ -780,14 +758,10 @@
 
                     newRow.querySelectorAll('select.auto-size-select').forEach(select => {
                         autoSizeSelect(select);
-                        select.addEventListener('change', () => {
-                            autoSizeSelect(select);
-                            updatePrintValues();
-                        });
+                        select.addEventListener('change', () => autoSizeSelect(select));
                     });
                     newRow.querySelector('.edit-info-btn').addEventListener('click', onEditInfoClick);
                     
-                    updatePrintValues();
                     addCultoModal.style.display = 'none';
                 });
 
@@ -811,7 +785,7 @@
             }
 
             // --- FUNÇÃO PRINCIPAL DE RENDERIZAÇÃO ---
-           function createServiceRow(weekIndex, service, disabledState) {
+            function createServiceRow(weekIndex, service, disabledState) {
                  const rowId = `row-${Date.now()}-${Math.random()}`;
                  const row = document.createElement('tr');
                  row.className = 'border-b border-gray-200 hover:bg-gray-50';
@@ -837,35 +811,6 @@
 
                     return `<select data-role="${role}" class="p-1 border-0 rounded w-full text-center auto-size-select ${classes}" ${disabledState}>${optionsHtml}</select>`;
                 };
-    
-    const portariaParts = service.portaria.includes('/') 
-        ? service.portaria.split('/').map(s => s.trim()) 
-        : [service.portaria.trim(), 'A DEFINIR'];
-     
-     row.innerHTML = `
-        <td class="px-2 py-1"><input type="date" class="p-1 border-0 rounded w-full date-input" value="${service.date}" data-row-id="${rowId}" ${disabledState}></td>
-        <td id="day-cell-${rowId}" class="px-2 py-1">${service.day}</td>
-        <td class="px-2 py-1 font-semibold text-blue-700 relative group">
-            <div data-type>${service.type}</div>
-            <div data-info-display class="text-xs text-gray-500 italic">${service.info || ''}</div>
-            <button class="edit-info-btn absolute top-1 right-1 p-0.5 bg-blue-100 rounded-full text-blue-600 opacity-0 group-hover:opacity-100 ${disabledState === 'disabled' ? 'hidden' : ''}" title="Adicionar/Editar Informação">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                </svg>
-            </button>
-        </td>
-        <td class="px-1 py-1 flex flex-col gap-1 items-center justify-center print-portaria" data-print-value="${portariaParts[0]} / ${portariaParts[1]}">
-            ${createSelectForRole(staffNames, portariaParts[0], '', 'portaria')}
-            ${createSelectForRole(staffNames, portariaParts[1], '', 'portaria')}
-        </td>
-        <td class="px-1 py-1 print-direcao" data-print-value="${service.direcao}">
-            ${createSelectForRole(staffNames, service.direcao, '', 'direcao')}
-        </td>
-        <td class="px-1 py-1 print-preleitor" data-print-value="${service.preleitor}">
-            ${createSelectForRole(staffNames, service.preleitor, 'font-semibold', 'preleitor')}
-        </td>`;
-     return row;
-};
                 
                 const portariaParts = service.portaria.includes('/') 
                     ? service.portaria.split('/').map(s => s.trim()) 
@@ -883,16 +828,12 @@
                             </svg>
                         </button>
                     </td>
-                    <td class="px-1 py-1 flex flex-col gap-1 items-center justify-center" data-print-value="${portariaParts[0]} / ${portariaParts[1]}">
+                    <td class="px-1 py-1 flex flex-col gap-1 items-center justify-center">
                         ${createSelectForRole(staffNames, portariaParts[0], '', 'portaria')}
                         ${createSelectForRole(staffNames, portariaParts[1], '', 'portaria')}
                     </td>
-                    <td class="px-1 py-1" data-print-value="${service.direcao}">
-                        ${createSelectForRole(staffNames, service.direcao, '', 'direcao')}
-                    </td>
-                    <td class="px-1 py-1" data-print-value="${service.preleitor}">
-                        ${createSelectForRole(staffNames, service.preleitor, 'font-semibold', 'preleitor')}
-                    </td>`;
+                    <td class="px-1 py-1">${createSelectForRole(staffNames, service.direcao, '', 'direcao')}</td>
+                    <td class="px-1 py-1">${createSelectForRole(staffNames, service.preleitor, 'font-semibold', 'preleitor')}</td>`;
                  return row;
             }
 
@@ -966,9 +907,6 @@
                     }
                 }
                 
-                // --- ATUALIZA OS VALORES DE IMPRESSÃO APÓS RENDERIZAR ---
-                updatePrintValues();
-                
                 // --- ADICIONAR EVENT LISTENERS DINÂMICOS ---
                 document.querySelectorAll('.date-input').forEach(i => i.addEventListener('change', (e) => {
                     const cell = document.getElementById(`day-cell-${e.target.dataset.rowId}`);
@@ -995,10 +933,7 @@
                 
                 document.querySelectorAll('select.auto-size-select').forEach(select => {
                     autoSizeSelect(select);
-                    select.addEventListener('change', () => {
-                        autoSizeSelect(select);
-                        updatePrintValues();
-                    });
+                    select.addEventListener('change', () => autoSizeSelect(select));
                 });
 
                 document.querySelectorAll('.edit-info-btn').forEach(btn => {
@@ -1024,9 +959,10 @@
                                         if (s.dataset.role === 'preleitor' || s.dataset.role === 'portaria' || s.dataset.role === 'direcao') {
                                              const newOption = new Option(trimmedName, trimmedName);
                                              if (s.querySelector('option[value="__outro__"]')) {
-                                                s.add(newOption, s.options[s.options.length - 2]);
+                                                s.add(newOption, s.options[s.options.length - 2]); // Antes de "Adicionar" e "Deletar"
                                              } else {
                                                 s.add(newOption);
+                                                // Re-sort options se não for preleitor
                                                 if (s.dataset.role !== 'preleitor') {
                                                     Array.from(s.options)
                                                         .sort((a, b) => a.text.localeCompare(b.text))
@@ -1038,7 +974,6 @@
                                 }
                                 currentSelect.value = trimmedName;
                                 autoSizeSelect(currentSelect);
-                                updatePrintValues();
                             } else {
                                 currentSelect.value = currentSelect.dataset.previousValue || 'A DEFINIR';
                                 autoSizeSelect(currentSelect);
@@ -1070,7 +1005,7 @@
                             
                             const index = staffNames.indexOf(trimmedName);
                             if (index > -1) {
-                                staffNames.splice(index, 1);
+                                staffNames.splice(index, 1); // Remove from master list
                                 
                                 document.querySelectorAll('select[data-role="portaria"], select[data-role="direcao"], select[data-role="preleitor"]').forEach(s => {
                                     const optionToRemove = s.querySelector(`option[value="${trimmedName}"]`);
@@ -1082,14 +1017,11 @@
                                 alert(`"${trimmedName}" foi removido com sucesso.`);
                                 currentSelect.value = 'A DEFINIR';
                                 autoSizeSelect(currentSelect);
-                                updatePrintValues();
                             } else {
                                 alert(`Nome "${trimmedName}" não encontrado na lista de nomes cadastrados.`);
                                 currentSelect.value = currentSelect.dataset.previousValue || 'A DEFINIR';
                                 autoSizeSelect(currentSelect);
                             }
-                        } else {
-                            updatePrintValues();
                         }
                     });
                 });
@@ -1106,7 +1038,7 @@
                 monthSelect.value = currentMonth;
                 yearInput.value = currentYear;
                 
-                await authReady;
+                await authReady; // Espera a autenticação do Firebase
                 
                 const scheduleId = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
                 let savedData = null;
@@ -1155,3 +1087,4 @@
     </script>
 </body>
 </html>
+
