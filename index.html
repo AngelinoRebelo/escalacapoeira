@@ -848,9 +848,9 @@
                     : [service.portaria.trim(), 'A DEFINIR'];
                  
                  row.innerHTML = `
-                    <td class="px-2 py-1"><input type="date" class="p-1 border-0 rounded w-full date-input" value="${service.date}" data-row-id="${rowId}" ${disabledState}></td>
-                    <td id="day-cell-${rowId}" class="px-2 py-1">${service.day}</td>
-                    <td class="px-2 py-1 font-semibold text-blue-700 relative group">
+                    <td class="px-2 py-1 align-middle text-center"><input type="date" class="p-1 border-0 rounded date-input mx-auto" style="width:100px;" value="${service.date}" data-row-id="${rowId}" ${disabledState}></td>
+                    <td id="day-cell-${rowId}" class="px-2 py-1 align-middle text-center">${service.day}</td>
+                    <td class="px-2 py-1 font-semibold text-blue-700 relative group align-middle text-center">
                         <div data-type>${service.type}</div>
                         <div data-info-display class="text-xs text-gray-500 italic">${service.info || ''}</div>
                         <button class="edit-info-btn absolute top-1 right-1 p-0.5 bg-blue-100 rounded-full text-blue-600 opacity-0 group-hover:opacity-100 ${disabledState === 'disabled' ? 'hidden' : ''}" title="Adicionar/Editar Informação">
@@ -859,12 +859,14 @@
                             </svg>
                         </button>
                     </td>
-                    <td class="px-1 py-1 flex flex-col gap-1 items-center justify-center">
-                        ${createSelectForRole(staffNames, portariaParts[0], 'mb-1', 'portaria')}
-                        ${createSelectForRole(staffNames, portariaParts[1], '', 'portaria')}
+                    <td class="px-1 py-1 align-middle text-center">
+                        <div class="flex flex-col gap-1 items-center justify-center">
+                            ${createSelectForRole(staffNames, portariaParts[0], 'mb-1', 'portaria')}
+                            ${createSelectForRole(staffNames, portariaParts[1], '', 'portaria')}
+                        </div>
                     </td>
-                    <td class="px-1 py-1">${createSelectForRole(staffNames, service.direcao, '', 'direcao')}</td>
-                    <td class="px-1 py-1">${createSelectForRole(staffNames, service.preleitor, 'font-semibold', 'preleitor')}</td>`;
+                    <td class="px-1 py-1 align-middle text-center">${createSelectForRole(staffNames, service.direcao, '', 'direcao')}</td>
+                    <td class="px-1 py-1 align-middle text-center">${createSelectForRole(staffNames, service.preleitor, 'font-semibold', 'preleitor')}</td>`;
                  return row;
             }
 
