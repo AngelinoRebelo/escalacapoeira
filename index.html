@@ -33,7 +33,7 @@
             text-align: center;
         }
 
-        /* ESTILOS DE IMPRESSÃO CORRETOS */
+        /* ESTILOS DE IMPRESSÃO CORRIGIDOS */
         @media print {
             /* Reset completo */
             * {
@@ -50,6 +50,7 @@
                 line-height: 1.1 !important;
                 width: 100% !important;
                 height: auto !important;
+                margin: 0 !important;
             }
 
             /* Esconde elementos não necessários */
@@ -66,13 +67,18 @@
             .absolute,
             .border-b,
             nav,
-            .flex-col > div,
-            .relative {
+            .flex-col > div:not(.print-content),
+            .relative,
+            select,
+            input,
+            button {
                 display: none !important;
                 visibility: hidden !important;
                 opacity: 0 !important;
                 height: 0 !important;
                 width: 0 !important;
+                position: absolute !important;
+                left: -9999px !important;
             }
 
             /* Layout principal visível */
@@ -89,67 +95,35 @@
             .shadow-md, .rounded-t-lg, .rounded-b-lg, .rounded-lg {
                 box-shadow: none !important;
                 border-radius: 0 !important;
-                border: 1px solid #ccc !important;
             }
 
-            /* CORREÇÃO CRÍTICA: Esconde todos os controles */
-            select,
-            input,
-            button {
+            /* CORREÇÃO CRÍTICA: Mostra os valores das células */
+            td {
+                display: table-cell !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+                position: static !important;
+                height: auto !important;
+                width: auto !important;
+                border: 1px solid #666 !important;
+            }
+
+            /* Remove elementos filhos das células */
+            td > *:not(.print-content) {
                 display: none !important;
-                visibility: hidden !important;
-                opacity: 0 !important;
-                width: 0 !important;
-                height: 0 !important;
-                border: none !important;
-                background: none !important;
-                position: absolute !important;
-                left: -9999px !important;
             }
 
-            /* CORREÇÃO CRÍTICA: Mostra os valores de impressão */
-            .print-value {
+            /* Mostra conteúdo de impressão */
+            .print-content {
                 display: block !important;
-                font-size: 9pt !important;
-                text-align: center !important;
-                padding: 2px 4px !important;
-                width: 100% !important;
-            }
-
-            /* Remove todo conteúdo original das células de dados */
-            td:has(select),
-            td:has(input) {
-                position: relative;
-            }
-
-            /* CORREÇÃO: Substitui conteúdo por valores de impressão */
-            td[data-print-value]::before {
-                content: attr(data-print-value) !important;
-                display: block !important;
+                visibility: visible !important;
+                opacity: 1 !important;
                 font-size: 9pt !important;
                 text-align: center !important;
                 padding: 3px 2px !important;
                 width: 100% !important;
                 white-space: pre-line;
-            }
-
-            /* Remove elementos filhos das células com data-print-value */
-            td[data-print-value] > * {
-                display: none !important;
-            }
-
-            /* Remove elementos filhos das células que contêm controles */
-            td:has(select) > *,
-            td:has(input) > * {
-                display: none !important;
-            }
-
-            /* Remove pseudo-elementos conflitantes */
-            td::after,
-            td::before,
-            .flex-col::after,
-            .flex-col::before {
-                content: none !important;
+                line-height: 1.2;
             }
 
             /* Estilos de tabela para impressão */
@@ -158,6 +132,7 @@
                 border-collapse: collapse !important;
                 page-break-inside: auto !important;
                 font-size: 9pt !important;
+                border: 1px solid #666 !important;
             }
 
             th, td {
@@ -239,6 +214,21 @@
 
             .overflow-x-auto {
                 overflow: visible !important;
+            }
+
+            /* CORREÇÃO: Garante que o cabeçalho seja visível */
+            #main-content .max-w-screen-2xl {
+                max-width: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+
+            /* CORREÇÃO: Título principal visível */
+            .bg-blue-600 {
+                background-color: #d1d5db !important;
+                color: black !important;
+                padding: 8px !important;
+                margin-bottom: 10px !important;
             }
         }
     </style>
@@ -514,27 +504,41 @@
                     <th class="px-2 py-2 w-[18%]">Preleitor</th>
                 </tr>`;
 
-            // --- FUNÇÃO DE IMPRESSÃO ---
+            // --- FUNÇÃO DE IMPRESSÃO CORRIGIDA ---
             function updatePrintValues() {
                 console.log("Atualizando valores para impressão...");
                 
                 document.querySelectorAll('tr[data-row-id]').forEach(row => {
                     const cells = row.querySelectorAll('td');
                     
+                    // Remove elementos de print antigos
+                    cells.forEach(cell => {
+                        const oldPrint = cell.querySelector('.print-content');
+                        if (oldPrint) {
+                            oldPrint.remove();
+                        }
+                    });
+                    
                     // Data (célula 0)
                     if (cells[0]) {
                         const input = cells[0].querySelector('input[type="date"]');
+                        let dateValue = '';
                         if (input && input.value) {
                             const [year, month, day] = input.value.split('-');
-                            cells[0].setAttribute('data-print-value', `${day}/${month}/${year}`);
-                        } else {
-                            cells[0].setAttribute('data-print-value', '');
+                            dateValue = `${day}/${month}/${year}`;
                         }
+                        const printDiv = document.createElement('div');
+                        printDiv.className = 'print-content';
+                        printDiv.textContent = dateValue;
+                        cells[0].appendChild(printDiv);
                     }
                     
                     // Dia (célula 1)
                     if (cells[1]) {
-                        cells[1].setAttribute('data-print-value', cells[1].textContent.trim());
+                        const printDiv = document.createElement('div');
+                        printDiv.className = 'print-content';
+                        printDiv.textContent = cells[1].textContent.trim();
+                        cells[1].appendChild(printDiv);
                     }
                     
                     // Culto + Info (célula 2)
@@ -545,33 +549,51 @@
                         if (info && info.textContent.trim()) {
                             value += `\n${info.textContent.trim()}`;
                         }
-                        cells[2].setAttribute('data-print-value', value);
+                        const printDiv = document.createElement('div');
+                        printDiv.className = 'print-content';
+                        printDiv.textContent = value;
+                        cells[2].appendChild(printDiv);
                     }
                     
                     // Portaria (célula 3)
                     if (cells[3]) {
                         const selects = cells[3].querySelectorAll('select');
+                        let value = 'A DEFINIR / A DEFINIR';
                         if (selects.length >= 2) {
                             const value1 = selects[0].options[selects[0].selectedIndex].text;
                             const value2 = selects[1].options[selects[1].selectedIndex].text;
-                            cells[3].setAttribute('data-print-value', `${value1} / ${value2}`);
+                            value = `${value1} / ${value2}`;
                         }
+                        const printDiv = document.createElement('div');
+                        printDiv.className = 'print-content';
+                        printDiv.textContent = value;
+                        cells[3].appendChild(printDiv);
                     }
                     
                     // Direção (célula 4)
                     if (cells[4]) {
                         const select = cells[4].querySelector('select');
+                        let value = 'A DEFINIR';
                         if (select) {
-                            cells[4].setAttribute('data-print-value', select.options[select.selectedIndex].text);
+                            value = select.options[select.selectedIndex].text;
                         }
+                        const printDiv = document.createElement('div');
+                        printDiv.className = 'print-content';
+                        printDiv.textContent = value;
+                        cells[4].appendChild(printDiv);
                     }
                     
                     // Preleitor (célula 5)
                     if (cells[5]) {
                         const select = cells[5].querySelector('select');
+                        let value = 'A DEFINIR';
                         if (select) {
-                            cells[5].setAttribute('data-print-value', select.options[select.selectedIndex].text);
+                            value = select.options[select.selectedIndex].text;
                         }
+                        const printDiv = document.createElement('div');
+                        printDiv.className = 'print-content';
+                        printDiv.textContent = value;
+                        cells[5].appendChild(printDiv);
                     }
                 });
             }
