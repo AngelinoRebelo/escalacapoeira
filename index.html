@@ -32,7 +32,7 @@
             margin: 0;
             text-align: center;
         }
-        /* Estilos para impressão mantidos */
+        /* Estilos para impressão - CORREÇÃO APLICADA */
         @media print {
             body {
                 -webkit-print-color-adjust: exact;
@@ -87,30 +87,47 @@
                 border-bottom: 1px solid #9ca3af !important;
             }
 
+            /* CORREÇÃO: Esconde todos os selects */
             select {
                 display: none !important;
             }
             
+            /* CORREÇÃO: Mostra os valores dos selects como texto */
             td[data-print-value] {
-                position: relative; 
+                position: relative;
+                border: 1px solid #d1d5db !important;
             }
+            
             td[data-print-value]::after {
                 content: attr(data-print-value);
                 display: block;
                 font-size: 9pt;
                 text-align: center;
+                padding: 2px 4px;
             }
             
-            td.flex-col {
-                display: block !important;
+            /* CORREÇÃO: Remove qualquer conteúdo original das células */
+            td[data-print-value] > * {
+                display: none !important;
             }
 
+            /* CORREÇÃO: Para células de portaria com múltiplos selects */
+            td.flex-col[data-print-value] {
+                display: table-cell !important;
+            }
+            
+            td.flex-col[data-print-value] > * {
+                display: none !important;
+            }
+
+            /* CORREÇÃO: Remove pseudo-elementos conflitantes */
             td.flex-col::after,
             .flex-col select:first-child::after,
             .flex-col select:last-child::after {
                 content: none !important; 
             }
 
+            /* CORREÇÃO: Inputs de data */
             input {
                 border: none !important;
                 background-color: transparent !important;
@@ -123,21 +140,35 @@
             }
 
             input[type="date"] {
-                display: inline-block !important;
-                width: auto !important;
-                font-size: 9pt !important;
+                display: none !important;
             }
 
+            /* CORREÇÃO: Mostra o valor do input date */
+            td:has(input[type="date"]) {
+                position: relative;
+            }
+            
+            td:has(input[type="date"])::after {
+                content: attr(data-print-value);
+                display: block;
+                font-size: 9pt;
+                text-align: center;
+                padding: 2px 4px;
+            }
+
+            /* CORREÇÃO: Remove botões de edição */
             .group, .edit-info-btn, .absolute {
                 display: none !important;
             }
 
+            /* CORREÇÃO: Informações adicionais */
             [data-info-display] {
                 font-size: 8pt !important;
                 color: #6b7280 !important;
                 margin-top: 1px !important;
             }
 
+            /* CORREÇÃO: Layout de células */
             .flex {
                 display: block !important;
             }
@@ -154,6 +185,7 @@
                 padding: 1px 2px !important;
             }
 
+            /* CORREÇÃO: Espaçamentos */
             .p-2, .p-4, .p-6, .p-8 {
                 padding: 4px !important;
             }
@@ -172,6 +204,7 @@
                 margin: 5px 0 !important;
             }
 
+            /* CORREÇÃO: Configuração da página */
             @page {
                 size: A4 landscape;
                 margin: 10mm;
@@ -380,7 +413,6 @@
         let userId = null;
         let schedulesCollection;
 
-        // CORREÇÃO: Melhorar a inicialização do Firebase
         const authReady = new Promise((resolve, reject) => {
             onAuthStateChanged(auth, async (user) => {
                 if (user) {
@@ -389,7 +421,6 @@
                     console.log("Firebase autenticado com sucesso, userId:", userId);
                     resolve(true);
                 } else {
-                    // Se não há usuário, tenta autenticar anonimamente
                     try {
                         await signInAnonymously(auth);
                     } catch(error) {
@@ -400,7 +431,6 @@
             });
         });
         
-        // CORREÇÃO: Função de autenticação melhorada
         async function authenticate() {
             try {
                 const userCredential = await signInAnonymously(auth);
@@ -497,28 +527,77 @@
                     <th class="px-1 py-1 w-[18%]">Preleitor</th>
                 </tr>`;
 
-            // --- LÓGICA DE IMPRESSÃO ---
+            // --- LÓGICA DE IMPRESSÃO - CORREÇÃO APLICADA ---
             function updatePrintValues() {
-                document.querySelectorAll('td:has(select):not(.flex-col)').forEach(td => {
-                    const select = td.querySelector('select');
-                    if (select) {
-                        td.setAttribute('data-print-value', select.options[select.selectedIndex].text);
+                console.log("Atualizando valores de impressão...");
+                
+                // CORREÇÃO: Atualiza células de data
+                document.querySelectorAll('td:has(input[type="date"])').forEach(td => {
+                    const input = td.querySelector('input[type="date"]');
+                    if (input) {
+                        const dateValue = input.value;
+                        // Formata a data para DD/MM/AAAA
+                        if (dateValue) {
+                            const [year, month, day] = dateValue.split('-');
+                            td.setAttribute('data-print-value', `${day}/${month}/${year}`);
+                        } else {
+                            td.setAttribute('data-print-value', '');
+                        }
                     }
                 });
 
+                // CORREÇÃO: Atualiza células com selects simples (Direção, Preleitor)
+                document.querySelectorAll('td:has(select):not(.flex-col)').forEach(td => {
+                    const select = td.querySelector('select');
+                    if (select) {
+                        const selectedText = select.options[select.selectedIndex].text;
+                        td.setAttribute('data-print-value', selectedText);
+                        console.log(`Select simples: ${selectedText}`);
+                    }
+                });
+
+                // CORREÇÃO: Atualiza células com múltiplos selects (Portaria)
                 document.querySelectorAll('td.flex-col').forEach(td => {
                     const selects = td.querySelectorAll('select');
                     const values = [...selects]
                         .filter(s => s.options.length > 0)
                         .map(s => s.options[s.selectedIndex].text);
-                    td.setAttribute('data-print-value', values.join(' / '));
+                    const portariaValue = values.join(' / ');
+                    td.setAttribute('data-print-value', portariaValue);
+                    console.log(`Portaria: ${portariaValue}`);
                 });
+
+                // CORREÇÃO: Atualiza células de culto (tipo + info)
+                document.querySelectorAll('td:has([data-type])').forEach(td => {
+                    const typeElement = td.querySelector('[data-type]');
+                    const infoElement = td.querySelector('[data-info-display]');
+                    const typeText = typeElement ? typeElement.textContent : '';
+                    const infoText = infoElement ? infoElement.textContent : '';
+                    
+                    let displayValue = typeText;
+                    if (infoText) {
+                        displayValue += `\n${infoText}`;
+                    }
+                    
+                    td.setAttribute('data-print-value', displayValue);
+                });
+
+                // CORREÇÃO: Atualiza células de dia da semana
+                document.querySelectorAll('td[id^="day-cell-"]').forEach(td => {
+                    const dayText = td.textContent.trim();
+                    td.setAttribute('data-print-value', dayText);
+                });
+
+                console.log("Valores de impressão atualizados com sucesso");
             }
 
             // --- LÓGICA DE AUTENTICAÇÃO E BOTÕES ---
             printBtn.addEventListener('click', () => {
-                updatePrintValues();
-                window.print();
+                console.log("Preparando para impressão...");
+                updatePrintValues(); // CORREÇÃO: Garante que os valores estão atualizados
+                setTimeout(() => {
+                    window.print();
+                }, 100);
             });
 
             const checkAuth = () => {
@@ -606,7 +685,6 @@
                         lastUpdated: new Date().toISOString()
                     };
 
-                    // CORREÇÃO: Coleta os dados da tabela de forma mais robusta
                     const weekHeaders = scheduleBody.querySelectorAll('tr[data-week-num]');
                     
                     weekHeaders.forEach(headerRow => {
@@ -626,7 +704,6 @@
                         const weekIndex = parseInt(row.dataset.weekIndex);
                         const cells = row.querySelectorAll('td');
                         
-                        // CORREÇÃO: Verificação mais robusta dos elementos
                         if (cells.length < 6) {
                             console.warn("Linha com número incorreto de células:", row);
                             return;
@@ -661,7 +738,6 @@
                         }
                     });
                     
-                    // Remove semanas vazias
                     scheduleData.weeks = scheduleData.weeks.filter(week => week && week.services && week.services.length > 0);
 
                     console.log("Salvando dados:", scheduleData);
@@ -679,7 +755,6 @@
                 listContainer.innerHTML = '<p class="text-gray-500 text-sm">Carregando...</p>';
                 
                 try {
-                    // CORREÇÃO: Garantir que o Firebase está pronto antes de carregar
                     if (!schedulesCollection) {
                         await authReady;
                     }
@@ -784,6 +859,7 @@
                 
                 if (newInfo !== null) {
                     infoDisplay.textContent = newInfo.trim();
+                    updatePrintValues(); // CORREÇÃO: Atualiza valores de impressão após edição
                 }
             }
 
@@ -802,7 +878,7 @@
                         });
                         console.log("Culto(s) removido(s) com sucesso.");
                         removeCultoModal.style.display = 'none';
-                        updatePrintValues();
+                        updatePrintValues(); // CORREÇÃO: Atualiza valores após remoção
                     };
 
                     if (removeCultoModal.querySelectorAll('input:checked').length > 0) {
@@ -845,7 +921,7 @@
                         autoSizeSelect(select);
                         select.addEventListener('change', () => {
                             autoSizeSelect(select);
-                            updatePrintValues();
+                            updatePrintValues(); // CORREÇÃO: Atualiza valores após mudança
                         });
                     });
                     
@@ -854,7 +930,7 @@
                         editBtn.addEventListener('click', onEditInfoClick);
                     }
                     
-                    updatePrintValues();
+                    updatePrintValues(); // CORREÇÃO: Atualiza valores após adição
                     addCultoModal.style.display = 'none';
                 });
 
@@ -905,7 +981,6 @@
                     return `<select data-role="${role}" class="p-1 border-0 rounded w-full text-center auto-size-select ${classes}" ${disabledState}>${optionsHtml}</select>`;
                 };
                 
-                // CORREÇÃO: Melhor parsing da portaria
                 let portariaParts;
                 if (service.portaria && service.portaria.includes('/')) {
                     portariaParts = service.portaria.split('/').map(s => s.trim());
@@ -913,7 +988,6 @@
                     portariaParts = [service.portaria ? service.portaria.trim() : 'A DEFINIR', 'A DEFINIR'];
                 }
                 
-                // Garantir que temos exatamente 2 partes
                 if (portariaParts.length === 1) {
                     portariaParts.push('A DEFINIR');
                 }
@@ -964,7 +1038,6 @@
                     scheduleBody.appendChild(headerRow);
                 };
                 
-                // CORREÇÃO: Renderização melhorada dos dados do Firebase
                 if (scheduleData && scheduleData.weeks) {
                     console.log("Renderizando dados do Firebase:", scheduleData);
                     scheduleData.weeks.forEach((week, weekIndex) => {
@@ -978,7 +1051,6 @@
                         }
                     });
                 } else {
-                    // Renderização padrão (sem dados salvos)
                     const firstDay = new Date(year, month, 1);
                     const daysInMonth = new Date(year, month + 1, 0).getDate();
                     const firstDayOfWeek = firstDay.getDay();
@@ -1028,6 +1100,7 @@
                     const cell = document.getElementById(`day-cell-${e.target.dataset.rowId}`);
                     const date = new Date(e.target.value + 'T00:00:00');
                     cell.textContent = dayNames[date.getDay()].toUpperCase();
+                    updatePrintValues(); // CORREÇÃO: Atualiza valores após mudança de data
                 }));
                 
                 document.querySelectorAll('.add-culto-btn').forEach(b => b.addEventListener('click', (e) => {
@@ -1061,7 +1134,7 @@
                     autoSizeSelect(select);
                     select.addEventListener('change', () => {
                         autoSizeSelect(select);
-                        updatePrintValues();
+                        updatePrintValues(); // CORREÇÃO: Atualiza valores após mudança
                     });
                 });
 
@@ -1102,7 +1175,7 @@
                                 }
                                 currentSelect.value = trimmedName;
                                 autoSizeSelect(currentSelect);
-                                updatePrintValues();
+                                updatePrintValues(); // CORREÇÃO: Atualiza valores após adição
                             } else {
                                 currentSelect.value = currentSelect.dataset.previousValue || 'A DEFINIR';
                                 autoSizeSelect(currentSelect);
@@ -1146,7 +1219,7 @@
                                 console.log(`"${trimmedName}" foi removido com sucesso.`);
                                 currentSelect.value = 'A DEFINIR';
                                 autoSizeSelect(currentSelect);
-                                updatePrintValues();
+                                updatePrintValues(); // CORREÇÃO: Atualiza valores após remoção
                             } else {
                                 console.error(`Nome "${trimmedName}" não encontrado na lista de nomes cadastrados.`);
                                 currentSelect.value = currentSelect.dataset.previousValue || 'A DEFINIR';
@@ -1156,7 +1229,7 @@
                     });
                 });
                 
-                updatePrintValues();
+                updatePrintValues(); // CORREÇÃO: Atualiza valores após renderização
             }
 
             // --- INICIALIZAÇÃO DA PÁGINA ---
@@ -1170,7 +1243,6 @@
                 monthSelect.value = currentMonth;
                 yearInput.value = currentYear;
                 
-                // CORREÇÃO: Inicialização melhorada do Firebase
                 try {
                     await authenticate();
                     console.log("Firebase inicializado com sucesso");
