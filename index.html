@@ -21,216 +21,200 @@
             -moz-appearance: none;
             appearance: none;
             background-image: none;
-            vertical-align: middle;
-            line-height: 1.2;
-        }
-        input[type="date"] {
-            font-size: 0.875rem;
-            line-height: 1.25rem;
-            height: 1.75rem;
-            padding: 0.125rem 0.375rem;
-            margin: 0;
-            text-align: center;
         }
 
-        /* ESTILOS DE IMPRESSÃO CORRIGIDOS */
-        @media print {
-            /* Reset completo */
-            * {
-                margin: 0 !important;
-                padding: 0 !important;
-                box-sizing: border-box !important;
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-            }
+      @media print {
+    body {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+        background-color: white;
+        font-size: 10pt;
+        line-height: 1.2;
+    }
 
-            body {
-                background: white !important;
-                font-size: 10pt !important;
-                line-height: 1.1 !important;
-                width: 100% !important;
-                height: auto !important;
-                margin: 0 !important;
-            }
+    #header-buttons, #auth-container, .border-b, footer, 
+    .remove-week-culto-btn, .add-culto-btn, #add-culto-modal, 
+    #remove-culto-modal, #tab-saved, #password-confirm-modal {
+        display: none !important;
+    }
 
-            /* Esconde elementos não necessários */
-            #header-buttons,
-            #auth-container,
-            footer,
-            .remove-week-culto-btn,
-            .add-culto-btn,
-            #add-culto-modal,
-            #remove-culto-modal,
-            #tab-saved,
-            #password-confirm-modal,
-            .edit-info-btn,
-            .absolute,
-            .border-b,
-            nav,
-            .flex-col > div:not(.print-content),
-            .relative,
-            select,
-            input,
-            button {
-                display: none !important;
-                visibility: hidden !important;
-                opacity: 0 !important;
-                height: 0 !important;
-                width: 0 !important;
-                position: absolute !important;
-                left: -9999px !important;
-            }
+    body, #main-content, #main-content > div {
+        padding: 0 !important;
+        margin: 0 !important;
+        width: 100% !important;
+    }
+    
+    #main-content > div {
+        max-width: 100% !important;
+        box-shadow: none !important;
+    }
 
-            /* Layout principal visível */
-            #main-content {
-                display: block !important;
-                width: 100% !important;
-                max-width: 100% !important;
-                padding: 0 !important;
-                margin: 0 !important;
-                box-shadow: none !important;
-            }
+    /* Remove sombras e bordas arredondadas */
+    .shadow-md, .rounded-t-lg, .rounded-b-lg, .rounded-lg {
+        box-shadow: none !important;
+        border-radius: 0 !important;
+        border: none !important;
+    }
+    
+    /* Melhora a aparência dos cabeçalhos */
+    .bg-blue-500 {
+        background-color: #d1d5db !important;
+        color: black !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
 
-            /* Remove sombras e bordas arredondadas */
-            .shadow-md, .rounded-t-lg, .rounded-b-lg, .rounded-lg {
-                box-shadow: none !important;
-                border-radius: 0 !important;
-            }
+    .bg-blue-200 {
+        background-color: #e5e7eb !important;
+        color: black !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+    
+    .table-header-week {
+        background-color: #f3f4f6 !important;
+        color: black !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+        border-bottom: 1px solid #9ca3af !important;
+    }
 
-            /* CORREÇÃO CRÍTICA: Mostra os valores das células */
-            td {
-                display: table-cell !important;
-                visibility: visible !important;
-                opacity: 1 !important;
-                position: static !important;
-                height: auto !important;
-                width: auto !important;
-                border: 1px solid #666 !important;
-            }
+    /* A SOLUÇÃO: Esconde os selects e mostra apenas os valores */
+    select {
+        display: none !important;
+    }
+    
+    /* Mostra os valores dos selects como texto simples */
+    td:has(select) {
+        position: relative;
+    }
+    
+    td:has(select)::after {
+        content: attr(data-print-value);
+        display: block;
+        font-size: 9pt;
+        text-align: center;
+    }
+    
+    /* Para células com múltiplos selects (portaria) */
+    td.flex-col::after {
+        content: none !important;
+    }
+    
+    td.flex-col {
+        display: block !important;
+    }
+    
+    .flex-col select:first-child::after {
+        content: attr(data-print-value);
+        display: block;
+    }
+    
+    .flex-col select:last-child::after {
+        content: attr(data-print-value);
+        display: block;
+        margin-top: 2px;
+    }
 
-            /* Remove elementos filhos das células */
-            td > *:not(.print-content) {
-                display: none !important;
-            }
+    /* Remove bordas e fundos de inputs */
+    input {
+        border: none !important;
+        background-color: transparent !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        appearance: none !important;
+        -webkit-appearance: none !important;
+        -moz-appearance: none !important;
+    }
 
-            /* Mostra conteúdo de impressão */
-            .print-content {
-                display: block !important;
-                visibility: visible !important;
-                opacity: 1 !important;
-                font-size: 9pt !important;
-                text-align: center !important;
-                padding: 3px 2px !important;
-                width: 100% !important;
-                white-space: pre-line;
-                line-height: 1.2;
-            }
+    /* Ajusta inputs para mostrar valores */
+    input[type="date"] {
+        display: inline-block !important;
+        width: auto !important;
+        font-size: 9pt !important;
+    }
 
-            /* Estilos de tabela para impressão */
-            table {
-                width: 100% !important;
-                border-collapse: collapse !important;
-                page-break-inside: auto !important;
-                font-size: 9pt !important;
-                border: 1px solid #666 !important;
-            }
+    /* Remove grupos e botões de edição */
+    .group, .edit-info-btn, .absolute {
+        display: none !important;
+    }
 
-            th, td {
-                border: 1px solid #666 !important;
-                padding: 4px 6px !important;
-                text-align: center !important;
-                vertical-align: middle !important;
-                height: auto !important;
-                min-height: 20px !important;
-            }
+    /* Ajusta informações adicionais */
+    [data-info-display] {
+        font-size: 8pt !important;
+        color: #6b7280 !important;
+        margin-top: 1px !important;
+    }
 
-            /* Cores para impressão */
-            .bg-blue-500 {
-                background-color: #e5e7eb !important;
-                color: black !important;
-                font-weight: bold !important;
-            }
+    /* Remove flex containers em células */
+    .flex {
+        display: block !important;
+    }
 
-            .bg-blue-200 {
-                background-color: #f3f4f6 !important;
-                color: black !important;
-                font-weight: bold !important;
-            }
+    .flex-col {
+        display: block !important;
+    }
 
-            .table-header-week {
-                background-color: #d1d5db !important;
-                color: black !important;
-                font-weight: bold !important;
-            }
+    .gap-1, .gap-2 {
+        gap: 0 !important;
+    }
 
-            /* Remove espaçamentos excessivos */
-            .p-2, .p-4, .p-6, .p-8 {
-                padding: 2px !important;
-            }
+    /* Ajusta células de portaria */
+    td:has(.flex-col) {
+        padding: 1px 2px !important;
+    }
 
-            .py-4, .py-2, .py-1 {
-                padding-top: 1px !important;
-                padding-bottom: 1px !important;
-            }
+    /* Remove espaçamentos excessivos */
+    .p-2, .p-4, .p-6, .p-8 {
+        padding: 4px !important;
+    }
 
-            .px-2, .px-1 {
-                padding-left: 2px !important;
-                padding-right: 2px !important;
-            }
+    .py-4, .py-2, .py-1 {
+        padding-top: 2px !important;
+        padding-bottom: 2px !important;
+    }
 
-            .my-4, .mb-4, .mb-6 {
-                margin: 2px 0 !important;
-            }
+    .px-2, .px-1 {
+        padding-left: 3px !important;
+        padding-right: 3px !important;
+    }
 
-            /* Configuração da página */
-            @page {
-                size: A4 landscape;
-                margin: 10mm;
-            }
+    .my-4, .mb-4, .mb-6 {
+        margin: 5px 0 !important;
+    }
 
-            /* Garante que não haja quebras ruins */
-            tr {
-                page-break-inside: avoid !important;
-                break-inside: avoid !important;
-            }
+    /* Configuração da página */
+    @page {
+        size: A4 landscape;
+        margin: 10mm;
+    }
 
-            /* Ajustes de fonte */
-            .font-bold {
-                font-weight: 600 !important;
-            }
+    /* Garante que não haja quebras de página dentro das semanas */
+    tr {
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
 
-            .font-semibold {
-                font-weight: 500 !important;
-            }
+    /* Ajusta font weights para melhor legibilidade na impressão */
+    .font-bold {
+        font-weight: 600 !important;
+    }
 
-            .text-blue-700 {
-                color: black !important;
-            }
+    .font-semibold {
+        font-weight: 500 !important;
+    }
 
-            /* Mostra apenas o conteúdo essencial */
-            #editor-view {
-                display: block !important;
-            }
+    /* Remove cores azuis muito claras */
+    .text-blue-700 {
+        color: black !important;
+    }
 
-            .overflow-x-auto {
-                overflow: visible !important;
-            }
-
-            /* CORREÇÃO: Garante que o cabeçalho seja visível */
-            #main-content .max-w-screen-2xl {
-                max-width: none !important;
-                padding: 0 !important;
-                margin: 0 !important;
-            }
-
-            /* CORREÇÃO: Título principal visível */
-            .bg-blue-600 {
-                background-color: #d1d5db !important;
-                color: black !important;
-                padding: 8px !important;
-                margin-bottom: 10px !important;
-            }
-        }
+    /* Remove qualquer opacidade */
+    .opacity-0, .group-hover\:opacity-100 {
+        opacity: 1 !important;
+    }
+}
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800">
@@ -239,25 +223,25 @@
 
     <!-- Modal de Autenticação -->
     <div id="auth-container" class="fixed inset-0 bg-black bg-opacity-60 flex-col items-center justify-center p-4 z-50 hidden">
-        <div id="login-view" class="bg-white p-6 rounded-xl shadow-lg w-full max-w-sm">
-            <h2 class="text-xl font-bold text-center text-blue-600 mb-4">Acessar Escala</h2>
-            <div id="login-error" class="bg-red-100 border border-red-400 text-red-700 px-3 py-2 rounded-lg relative mb-3 hidden" role="alert">
+        <div id="login-view" class="bg-white p-8 rounded-xl shadow-lg w-full max-w-sm">
+            <h2 class="text-2xl font-bold text-center text-blue-600 mb-6">Acessar Escala</h2>
+            <div id="login-error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg relative mb-4 hidden" role="alert">
                 <span class="block sm:inline">Usuário ou senha incorretos.</span>
             </div>
             <form id="login-form">
-                <div class="mb-3">
-                    <label for="username" class="block text-gray-700 text-sm font-bold mb-1">Usuário</label>
+                <div class="mb-4">
+                    <label for="username" class="block text-gray-700 text-sm font-bold mb-2">Usuário</label>
                     <input type="text" id="username" class="shadow-sm appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500" required>
                 </div>
-                <div class="mb-4">
-                    <label for="password" class="block text-gray-700 text-sm font-bold mb-1">Senha</label>
+                <div class="mb-6">
+                    <label for="password" class="block text-gray-700 text-sm font-bold mb-2">Senha</label>
                     <input type="password" id="password" class="shadow-sm appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500" required>
                 </div>
-                <div class="flex items-center justify-center gap-3">
-                    <button type="button" id="cancel-login-btn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-3 rounded-lg focus:outline-none focus:shadow-outline transition-colors">
+                <div class="flex items-center justify-center gap-4">
+                    <button type="button" id="cancel-login-btn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg focus:outline-none focus:shadow-outline transition-colors">
                         Cancelar
                     </button>
-                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded-lg w-full focus:outline-none focus:shadow-outline transition-colors">
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg w-full focus:outline-none focus:shadow-outline transition-colors">
                         Entrar
                     </button>
                 </div>
@@ -267,11 +251,11 @@
 
     <!-- Conteúdo Principal -->
     <div id="main-content">
-        <div class="max-w-screen-2xl mx-auto p-4">
+        <div class="max-w-screen-2xl mx-auto p-2 sm:p-4">
             <!-- Cabeçalho -->
-            <div class="bg-blue-600 text-white text-center py-4 rounded-t-lg shadow-lg relative flex items-center justify-center">
-                <h1 class="text-2xl font-bold tracking-wider mx-auto">ESCALA DE CULTOS ADCA - CAPOEIRA GRANDE</h1>
-                <div id="header-buttons" class="absolute right-4 flex items-center gap-2">
+            <div class="bg-blue-600 text-white text-center py-4 rounded-t-lg shadow-lg relative">
+                <h1 class="text-xl md:text-2xl font-bold tracking-wider">ESCALA DE CULTOS ADCA - CAPOEIRA GRANDE</h1>
+                <div id="header-buttons" class="absolute top-1/2 right-4 -translate-y-1/2 flex items-center gap-2">
                     <button id="print-btn" title="Imprimir" class="p-2 bg-gray-500 hover:bg-gray-600 text-white rounded-full transition-colors">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                           <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
@@ -313,7 +297,8 @@
 
                     <!-- Tabela da Escala -->
                     <div class="overflow-x-auto p-2">
-                        <table class="w-full text-sm text-center border-collapse border border-gray-300">
+                        <table class="w-full text-xs sm:text-sm text-center">
+                            <!-- Cabeçalho principal removido daqui -->
                             <tbody id="schedule-body"></tbody>
                         </table>
                     </div>
@@ -321,9 +306,9 @@
 
                 <!-- View de Escalas Salvas -->
                 <div id="saved-schedules-view" class="hidden p-6">
-                    <h2 class="text-xl font-bold mb-4 text-gray-700">Escalas Salvas</h2>
+                    <h2 class="text-xl font-bold mb-4 text-gray-700">Escalas Salvas no Firebase</h2>
                     <div id="saved-schedules-list" class="space-y-3">
-                         <p class="text-gray-500">Carregando escalas salvas...</p>
+                         <p class="text-gray-500">Nenhuma escala salva ainda.</p>
                     </div>
                 </div>
             </div>
@@ -405,26 +390,31 @@
             messagingSenderId: "50984261791",
             appId: "1:50984261791:web:d2b1a147919dc0c19baaaa"
         };
-        
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        
         let userId = null;
-        let schedulesCollection = collection(db, 'schedules');
+        let schedulesCollection;
 
-        // Autenticação anônima
-        async function initializeFirebase() {
+        const authReady = new Promise((resolve) => {
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    userId = user.uid;
+                    schedulesCollection = collection(db, 'schedules');
+                    resolve(true);
+                }
+            });
+        });
+        
+        async function authenticate() {
             try {
-                const userCredential = await signInAnonymously(auth);
-                userId = userCredential.user.uid;
-                console.log("Firebase conectado com sucesso. User ID:", userId);
-                return true;
-            } catch (error) {
-                console.error("Erro ao conectar com Firebase:", error);
-                return false;
+                await signInAnonymously(auth);
+            } catch(error) {
+                console.error("Anonymous sign-in failed:", error);
             }
         }
+        authenticate();
+
 
         document.addEventListener('DOMContentLoaded', function() {
             // --- ELEMENTOS DO DOM ---
@@ -443,6 +433,11 @@
             const yearInput = document.getElementById('year-input');
             const scheduleBody = document.getElementById('schedule-body');
             const textWidthHelper = document.getElementById('text-width-helper');
+            const passwordConfirmModal = document.getElementById('password-confirm-modal');
+            const cancelPasswordConfirmBtn = document.getElementById('cancel-password-confirm');
+            const confirmPasswordActionBtn = document.getElementById('confirm-password-action');
+            const confirmPasswordInput = document.getElementById('confirm-password-input');
+            const passwordConfirmError = document.getElementById('password-confirm-error');
 
             // --- ESTADO DA APLICAÇÃO ---
             let isLoggedIn = false;
@@ -495,117 +490,18 @@
             const loginIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>`;
             const logoutIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>`;
             const weekHeaderHTML = `
-                <tr class="bg-blue-500 text-white uppercase tracking-wider text-sm table-header-week">
-                    <th class="px-2 py-2 w-[12%]">Data</th>
-                    <th class="px-2 py-2 w-[10%]">Dia</th>
-                    <th class="px-2 py-2 w-[18%]">Culto</th>
-                    <th class="px-2 py-2 w-[25%]">Portaria</th>
-                    <th class="px-2 py-2 w-[17%]">Direção</th>
-                    <th class="px-2 py-2 w-[18%]">Preleitor</th>
+                <tr class="bg-blue-500 text-white uppercase tracking-wider text-xs sm:text-sm table-header-week">
+                    <th class="px-2 py-2">Data</th>
+                    <th class="px-2 py-2">Dia</th>
+                    <th class="px-2 py-2">Culto</th>
+                    <th class="px-2 py-2">Portaria</th>
+                    <th class="px-2 py-2">Direção</th>
+                    <th class="px-2 py-2">Preleitor</th>
                 </tr>`;
 
-            // --- FUNÇÃO DE IMPRESSÃO CORRIGIDA ---
-            function updatePrintValues() {
-                console.log("Atualizando valores para impressão...");
-                
-                document.querySelectorAll('tr[data-row-id]').forEach(row => {
-                    const cells = row.querySelectorAll('td');
-                    
-                    // Remove elementos de print antigos
-                    cells.forEach(cell => {
-                        const oldPrint = cell.querySelector('.print-content');
-                        if (oldPrint) {
-                            oldPrint.remove();
-                        }
-                    });
-                    
-                    // Data (célula 0)
-                    if (cells[0]) {
-                        const input = cells[0].querySelector('input[type="date"]');
-                        let dateValue = '';
-                        if (input && input.value) {
-                            const [year, month, day] = input.value.split('-');
-                            dateValue = `${day}/${month}/${year}`;
-                        }
-                        const printDiv = document.createElement('div');
-                        printDiv.className = 'print-content';
-                        printDiv.textContent = dateValue;
-                        cells[0].appendChild(printDiv);
-                    }
-                    
-                    // Dia (célula 1)
-                    if (cells[1]) {
-                        const printDiv = document.createElement('div');
-                        printDiv.className = 'print-content';
-                        printDiv.textContent = cells[1].textContent.trim();
-                        cells[1].appendChild(printDiv);
-                    }
-                    
-                    // Culto + Info (célula 2)
-                    if (cells[2]) {
-                        const type = cells[2].querySelector('[data-type]');
-                        const info = cells[2].querySelector('[data-info-display]');
-                        let value = type ? type.textContent.trim() : '';
-                        if (info && info.textContent.trim()) {
-                            value += `\n${info.textContent.trim()}`;
-                        }
-                        const printDiv = document.createElement('div');
-                        printDiv.className = 'print-content';
-                        printDiv.textContent = value;
-                        cells[2].appendChild(printDiv);
-                    }
-                    
-                    // Portaria (célula 3)
-                    if (cells[3]) {
-                        const selects = cells[3].querySelectorAll('select');
-                        let value = 'A DEFINIR / A DEFINIR';
-                        if (selects.length >= 2) {
-                            const value1 = selects[0].options[selects[0].selectedIndex].text;
-                            const value2 = selects[1].options[selects[1].selectedIndex].text;
-                            value = `${value1} / ${value2}`;
-                        }
-                        const printDiv = document.createElement('div');
-                        printDiv.className = 'print-content';
-                        printDiv.textContent = value;
-                        cells[3].appendChild(printDiv);
-                    }
-                    
-                    // Direção (célula 4)
-                    if (cells[4]) {
-                        const select = cells[4].querySelector('select');
-                        let value = 'A DEFINIR';
-                        if (select) {
-                            value = select.options[select.selectedIndex].text;
-                        }
-                        const printDiv = document.createElement('div');
-                        printDiv.className = 'print-content';
-                        printDiv.textContent = value;
-                        cells[4].appendChild(printDiv);
-                    }
-                    
-                    // Preleitor (célula 5)
-                    if (cells[5]) {
-                        const select = cells[5].querySelector('select');
-                        let value = 'A DEFINIR';
-                        if (select) {
-                            value = select.options[select.selectedIndex].text;
-                        }
-                        const printDiv = document.createElement('div');
-                        printDiv.className = 'print-content';
-                        printDiv.textContent = value;
-                        cells[5].appendChild(printDiv);
-                    }
-                });
-            }
 
-            // --- LÓGICA DE IMPRESSÃO ---
-            printBtn.addEventListener('click', () => {
-                console.log("Preparando para impressão...");
-                updatePrintValues();
-                setTimeout(() => {
-                    window.print();
-                }, 100);
-            });
+            // --- LÓGICA DE AUTENTICAÇÃO E BOTÕES ---
+            printBtn.addEventListener('click', () => window.print());
 
             const checkAuth = () => {
                 isLoggedIn = sessionStorage.getItem('escala_loggedin') === 'true';
@@ -639,11 +535,7 @@
                 }
             });
 
-            cancelLoginBtn.addEventListener('click', () => { 
-                authContainer.classList.add('hidden'); 
-                authContainer.classList.remove('flex'); 
-            });
-            
+            cancelLoginBtn.addEventListener('click', () => { authContainer.classList.add('hidden'); authContainer.classList.remove('flex'); });
             loginForm.addEventListener('submit', (e) => {
                 e.preventDefault();
                 loginError.classList.add('hidden');
@@ -674,69 +566,49 @@
                 loadSavedSchedules();
             });
 
-            // --- FIREBASE OPERATIONS ---
+            // --- LÓGICA FIREBASE (SALVAR/CARREGAR/DELETAR) ---
             saveScheduleBtn.addEventListener('click', saveScheduleToFirebase);
 
             async function saveScheduleToFirebase() {
-                if (!userId) {
-                    console.error("Usuário não autenticado no Firebase");
-                    return;
-                }
+                if (!schedulesCollection) { alert("Erro de conexão com o Firebase."); return; }
                 
                 try {
                     const month = parseInt(monthSelect.value);
                     const year = parseInt(yearInput.value);
                     const scheduleId = `${year}-${String(month + 1).padStart(2, '0')}`;
                     
-                    const scheduleData = { 
-                        month, 
-                        year, 
-                        scheduleName: `${months[month]} de ${year}`, 
-                        weeks: [],
-                        lastUpdated: new Date().toISOString()
-                    };
+                    const scheduleData = { month, year, scheduleName: `${months[month]} de ${year}`, weeks: [] };
 
-                    // Coleta dados das semanas
-                    const weekHeaders = scheduleBody.querySelectorAll('tr[data-week-num]');
-                    
-                    weekHeaders.forEach(headerRow => {
+                    scheduleBody.querySelectorAll('tr[data-week-num]').forEach(headerRow => {
                         const weekNum = parseInt(headerRow.dataset.weekNum);
-                        const weekName = headerRow.querySelector('td').textContent.trim();
-                        
                         scheduleData.weeks[weekNum] = {
-                            weekName: weekName,
+                            weekName: headerRow.querySelector('td').childNodes[0].textContent.trim(),
                             services: []
                         };
                     });
 
-                    // Coleta dados dos serviços
-                    const serviceRows = scheduleBody.querySelectorAll('tr[data-row-id]');
-                    serviceRows.forEach(row => {
+                    scheduleBody.querySelectorAll('tr[data-row-id]').forEach(row => {
                         const weekIndex = parseInt(row.dataset.weekIndex);
                         const cells = row.querySelectorAll('td');
                         
-                        if (cells.length < 6) return;
-
-                        const dateInput = cells[0].querySelector('input[type="date"]');
-                        const cultoTypeElement = cells[2].querySelector('[data-type]');
-                        const infoElement = cells[2].querySelector('[data-info-display]');
                         const portariaSelects = cells[3].querySelectorAll('select');
                         const direcaoSelect = cells[4].querySelector('select');
                         const preleitorSelect = cells[5].querySelector('select');
 
-                        if (!dateInput || !cultoTypeElement) return;
-
-                        const portariaValue = portariaSelects.length >= 2 ? 
-                            `${portariaSelects[0].value} / ${portariaSelects[1].value}` : 'A DEFINIR / A DEFINIR';
+                        if (!portariaSelects || portariaSelects.length < 2 || !direcaoSelect || !preleitorSelect) {
+                            throw new Error("Não foi possível encontrar todos os campos de seleção em uma linha da tabela.");
+                        }
+                        
+                        const portariaValue = `${portariaSelects[0].value} / ${portariaSelects[1].value}`;
 
                         const service = {
-                            date: dateInput.value,
+                            date: cells[0].querySelector('input').value,
                             day: cells[1].textContent,
-                            type: cultoTypeElement.textContent,
-                            info: infoElement ? infoElement.textContent : '',
+                            type: cells[2].querySelector('[data-type]').textContent,
+                            info: cells[2].querySelector('[data-info-display]').textContent,
                             portaria: portariaValue,
-                            direcao: direcaoSelect ? direcaoSelect.value : 'A DEFINIR',
-                            preleitor: preleitorSelect ? preleitorSelect.value : 'A DEFINIR'
+                            direcao: direcaoSelect.value,
+                            preleitor: preleitorSelect.value
                         };
                         
                         if (scheduleData.weeks[weekIndex]) {
@@ -744,43 +616,31 @@
                         }
                     });
                     
-                    // Remove semanas vazias
-                    scheduleData.weeks = scheduleData.weeks.filter(week => week && week.services && week.services.length > 0);
+                    scheduleData.weeks = scheduleData.weeks.filter(Boolean);
 
-                    console.log("Salvando no Firebase:", scheduleData);
-                    
-                    await setDoc(doc(db, 'schedules', scheduleId), scheduleData);
+                    await setDoc(doc(schedulesCollection, scheduleId), scheduleData);
                     alert(`Escala para ${scheduleData.scheduleName} salva com sucesso!`);
                     tabSaved.click();
                 } catch (error) { 
                     console.error("Erro ao salvar:", error); 
-                    alert("Erro ao salvar a escala: " + error.message);
+                    alert("Erro ao salvar a escala. Detalhes: " + error.message); 
                 }
             }
             
             async function loadSavedSchedules() {
                 const listContainer = document.getElementById('saved-schedules-list');
                 listContainer.innerHTML = '<p class="text-gray-500">Carregando...</p>';
-                
                 try {
+                    await authReady; // Garante que o firebase está pronto
                     const querySnapshot = await getDocs(schedulesCollection);
-                    if (querySnapshot.empty) { 
-                        listContainer.innerHTML = '<p class="text-gray-500">Nenhuma escala salva.</p>'; 
-                        return; 
-                    }
-                    
+                    if (querySnapshot.empty) { listContainer.innerHTML = '<p class="text-gray-500">Nenhuma escala salva.</p>'; return; }
                     listContainer.innerHTML = '';
                     querySnapshot.forEach((doc) => {
                         const schedule = doc.data();
                         const el = document.createElement('div');
                         el.className = 'flex justify-between items-center bg-gray-50 p-3 rounded-lg border';
                         
-                        const deleteButtonHtml = isLoggedIn ? 
-                            `<button data-id="${doc.id}" class="delete-btn bg-red-500 text-white p-2 rounded-full hover:bg-red-600 text-sm">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                </svg>
-                            </button>` : '';
+                        const deleteButtonHtml = isLoggedIn ? `<button data-id="${doc.id}" class="delete-btn bg-red-500 text-white p-2 rounded-full hover:bg-red-600 text-sm"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>` : '';
 
                         el.innerHTML = `
                             <span class="font-medium text-gray-800">${schedule.scheduleName}</span>
@@ -790,53 +650,141 @@
                             </div>`;
                         listContainer.appendChild(el);
                     });
-                    
-                    listContainer.querySelectorAll('.load-btn').forEach(b => 
-                        b.addEventListener('click', (e) => loadSpecificSchedule(e.target.dataset.id))
-                    );
-                    
+                    listContainer.querySelectorAll('.load-btn').forEach(b => b.addEventListener('click', (e) => loadSpecificSchedule(e.target.dataset.id)));
                     if (isLoggedIn) {
-                        listContainer.querySelectorAll('.delete-btn').forEach(b => 
-                            b.addEventListener('click', (e) => deleteSchedule(e.currentTarget.dataset.id))
-                        );
+                        listContainer.querySelectorAll('.delete-btn').forEach(b => b.addEventListener('click', (e) => deleteSchedule(e.currentTarget.dataset.id)));
                     }
-                } catch (error) { 
-                    console.error("Erro ao carregar escalas:", error); 
-                    listContainer.innerHTML = '<p class="text-red-500">Erro ao carregar escalas salvas.</p>'; 
-                }
+                } catch (error) { console.error("Erro ao carregar:", error); listContainer.innerHTML = '<p class="text-red-500">Erro ao carregar.</p>'; }
             }
 
             async function loadSpecificSchedule(docId) {
                 try {
-                    const docSnap = await getDoc(doc(db, 'schedules', docId));
+                    const docSnap = await getDoc(doc(schedulesCollection, docId));
                     if (docSnap.exists()) {
                         const data = docSnap.data();
-                        console.log("Dados carregados do Firebase:", data);
                         monthSelect.value = data.month;
                         yearInput.value = data.year;
                         renderSchedule(data.year, data.month, data);
                         tabEditor.click();
-                    } else { 
-                        console.error("Escala não encontrada."); 
-                    }
-                } catch (error) { 
-                    console.error("Erro ao carregar escala:", error); 
-                }
+                    } else { alert("Escala não encontrada."); }
+                } catch (error) { console.error("Erro ao carregar:", error); alert("Erro ao carregar a escala."); }
             }
 
             async function deleteSchedule(docId) {
-                if (!confirm("Tem certeza que deseja excluir esta escala?")) return;
+                const performDeletion = async () => {
+                    if (confirm("Tem certeza que deseja excluir esta escala permanentemente?")) {
+                        try {
+                            await deleteDoc(doc(schedulesCollection, docId));
+                            alert("Escala excluída com sucesso.");
+                            loadSavedSchedules();
+                        } catch (error) { 
+                            console.error("Erro ao excluir:", error); 
+                            alert("Erro ao excluir a escala."); 
+                        }
+                    }
+                };
+                requestPasswordConfirmation(performDeletion);
+            }
+            
+            // --- LÓGICA DOS MODAIS E AUTO-AJUSTE ---
+            function autoSizeSelect(element) {
+                if (!element) return;
+                const selectedOption = element.options[element.selectedIndex];
+                textWidthHelper.style.font = window.getComputedStyle(element).font;
+                textWidthHelper.textContent = selectedOption.text;
+                element.style.width = `${textWidthHelper.scrollWidth + 10}px`;
+            }
+
+            function requestPasswordConfirmation(callback) {
+                onPasswordConfirm = callback;
+                confirmPasswordInput.value = '';
+                passwordConfirmError.classList.add('hidden');
+                passwordConfirmModal.style.display = 'flex';
+            }
+            
+            function onEditInfoClick(e) {
+                const btn = e.currentTarget;
+                const infoDisplay = btn.closest('td').querySelector('[data-info-display]');
+                if (!infoDisplay) return;
                 
-                try {
-                    await deleteDoc(doc(db, 'schedules', docId));
-                    loadSavedSchedules();
-                } catch (error) { 
-                    console.error("Erro ao excluir:", error); 
-                    alert("Erro ao excluir escala: " + error.message);
+                const currentText = infoDisplay.textContent;
+                const newInfo = prompt("Adicionar/Editar Informação:", currentText);
+                
+                if (newInfo !== null) { // User clicked OK
+                    infoDisplay.textContent = newInfo.trim();
                 }
             }
 
-            // --- FUNÇÃO PRINCIPAL DE RENDERIZAÇÃO CORRIGIDA ---
+            const addCultoModal = document.getElementById('add-culto-modal');
+            const removeCultoModal = document.getElementById('remove-culto-modal');
+            let currentWeekForModal = null;
+            function setupModalEvents() {
+                document.getElementById('cancel-add-culto').addEventListener('click', () => { addCultoModal.style.display = 'none'; });
+                document.getElementById('cancel-remove-culto').addEventListener('click', () => { removeCultoModal.style.display = 'none'; });
+                document.getElementById('confirm-remove-culto').addEventListener('click', () => {
+                     const performRemoval = () => {
+                        removeCultoModal.querySelectorAll('input:checked').forEach(cb => {
+                            const row = scheduleBody.querySelector(`tr[data-row-id="${cb.value}"]`);
+                            if (row) row.remove();
+                        });
+                        alert("Culto(s) removido(s) com sucesso.");
+                        removeCultoModal.style.display = 'none';
+                    };
+
+                    if (removeCultoModal.querySelectorAll('input:checked').length > 0) {
+                        requestPasswordConfirmation(performRemoval);
+                    } else {
+                        removeCultoModal.style.display = 'none';
+                    }
+                });
+                document.getElementById('confirm-add-culto').addEventListener('click', () => {
+                    const newDate = document.getElementById('new-culto-date').value;
+                    if (!newDate) { alert("Por favor, selecione uma data."); return; }
+
+                    const dateObj = new Date(newDate + 'T00:00:00');
+                    const serviceData = {
+                        date: newDate,
+                        day: dayNames[dateObj.getDay()].toUpperCase(),
+                        type: document.getElementById('new-culto-type').value,
+                        info: '',
+                        portaria: 'A DEFINIR', direcao: 'A DEFINIR', preleitor: 'A DEFINIR'
+                    };
+                    
+                    const disabledState = isLoggedIn ? '' : 'disabled';
+                    const newRow = createServiceRow(currentWeekForModal, serviceData, disabledState);
+                    let lastRowInWeek = scheduleBody.querySelector(`tr[data-week-num="${currentWeekForModal}"]`);
+                    scheduleBody.querySelectorAll(`tr[data-week-index="${currentWeekForModal}"]`).forEach(r => lastRowInWeek = r);
+                    lastRowInWeek.insertAdjacentElement('afterend', newRow);
+
+                    newRow.querySelectorAll('select.auto-size-select').forEach(select => {
+                        autoSizeSelect(select);
+                        select.addEventListener('change', () => autoSizeSelect(select));
+                    });
+                    newRow.querySelector('.edit-info-btn').addEventListener('click', onEditInfoClick);
+                    
+                    addCultoModal.style.display = 'none';
+                });
+
+                cancelPasswordConfirmBtn.addEventListener('click', () => {
+                    passwordConfirmModal.style.display = 'none';
+                    onPasswordConfirm = null;
+                });
+                
+                confirmPasswordActionBtn.addEventListener('click', () => {
+                    if (confirmPasswordInput.value === '3458') {
+                        if (typeof onPasswordConfirm === 'function') {
+                            onPasswordConfirm();
+                        }
+                        passwordConfirmModal.style.display = 'none';
+                        onPasswordConfirm = null;
+                    } else {
+                        passwordConfirmError.classList.remove('hidden');
+                        confirmPasswordInput.value = '';
+                    }
+                });
+            }
+
+            // --- FUNÇÃO PRINCIPAL DE RENDERIZAÇÃO ---
             function createServiceRow(weekIndex, service, disabledState) {
                  const rowId = `row-${Date.now()}-${Math.random()}`;
                  const row = document.createElement('tr');
@@ -864,27 +812,14 @@
                     return `<select data-role="${role}" class="p-1 border-0 rounded w-full text-center auto-size-select ${classes}" ${disabledState}>${optionsHtml}</select>`;
                 };
                 
-                // CORREÇÃO: Parsing melhorado da portaria
-                let portariaParts = ['A DEFINIR', 'A DEFINIR'];
-                if (service.portaria) {
-                    if (service.portaria.includes('/')) {
-                        portariaParts = service.portaria.split('/').map(s => s.trim());
-                    } else {
-                        portariaParts = [service.portaria.trim(), 'A DEFINIR'];
-                    }
-                }
-                
-                // Garante que temos exatamente 2 partes
-                if (portariaParts.length === 1) {
-                    portariaParts.push('A DEFINIR');
-                }
-
+                const portariaParts = service.portaria.includes('/') 
+                    ? service.portaria.split('/').map(s => s.trim()) 
+                    : [service.portaria.trim(), 'A DEFINIR'];
+                 
                  row.innerHTML = `
-                    <td class="px-2 py-1 align-middle text-center">
-                        <input type="date" class="p-1 border-0 rounded date-input mx-auto" style="width:100px;" value="${service.date}" data-row-id="${rowId}" ${disabledState}>
-                    </td>
-                    <td id="day-cell-${rowId}" class="px-2 py-1 align-middle text-center">${service.day}</td>
-                    <td class="px-2 py-1 font-semibold text-blue-700 relative group align-middle text-center">
+                    <td class="px-2 py-1"><input type="date" class="p-1 border-0 rounded w-full date-input" value="${service.date}" data-row-id="${rowId}" ${disabledState}></td>
+                    <td id="day-cell-${rowId}" class="px-2 py-1">${service.day}</td>
+                    <td class="px-2 py-1 font-semibold text-blue-700 relative group">
                         <div data-type>${service.type}</div>
                         <div data-info-display class="text-xs text-gray-500 italic">${service.info || ''}</div>
                         <button class="edit-info-btn absolute top-1 right-1 p-0.5 bg-blue-100 rounded-full text-blue-600 opacity-0 group-hover:opacity-100 ${disabledState === 'disabled' ? 'hidden' : ''}" title="Adicionar/Editar Informação">
@@ -893,19 +828,16 @@
                             </svg>
                         </button>
                     </td>
-                    <td class="px-1 py-1 align-middle text-center">
-                        <div class="flex flex-col gap-1 items-center justify-center">
-                            ${createSelectForRole(staffNames, portariaParts[0], 'mb-1', 'portaria')}
-                            ${createSelectForRole(staffNames, portariaParts[1], '', 'portaria')}
-                        </div>
+                    <td class="px-1 py-1 flex flex-col gap-1 items-center justify-center">
+                        ${createSelectForRole(staffNames, portariaParts[0], '', 'portaria')}
+                        ${createSelectForRole(staffNames, portariaParts[1], '', 'portaria')}
                     </td>
-                    <td class="px-1 py-1 align-middle text-center">${createSelectForRole(staffNames, service.direcao, '', 'direcao')}</td>
-                    <td class="px-1 py-1 align-middle text-center">${createSelectForRole(staffNames, service.preleitor, 'font-semibold', 'preleitor')}</td>`;
+                    <td class="px-1 py-1">${createSelectForRole(staffNames, service.direcao, '', 'direcao')}</td>
+                    <td class="px-1 py-1">${createSelectForRole(staffNames, service.preleitor, 'font-semibold', 'preleitor')}</td>`;
                  return row;
             }
 
             function renderSchedule(year, month, scheduleData = null) {
-                console.log("Renderizando escala para:", year, month, scheduleData);
                 scheduleBody.innerHTML = '';
                 const disabledState = isLoggedIn ? '' : 'disabled';
                 
@@ -926,29 +858,14 @@
                     scheduleBody.appendChild(headerRow);
                 };
                 
-                // CORREÇÃO: Renderização correta dos dados do Firebase
                 if (scheduleData && scheduleData.weeks) {
-                    console.log("Carregando dados do Firebase:", scheduleData);
-                    
-                    // Processa cada semana
                     scheduleData.weeks.forEach((week, weekIndex) => {
-                        if (week && week.weekName && week.services) {
-                            console.log(`Processando semana ${weekIndex}:`, week);
-                            createWeekHeader(weekIndex, week.weekName);
-                            
-                            // Processa cada serviço da semana
-                            week.services.forEach(service => {
-                                if (service) {
-                                    console.log("Adicionando serviço:", service);
-                                    const row = createServiceRow(weekIndex, service, disabledState);
-                                    scheduleBody.appendChild(row);
-                                }
-                            });
+                        createWeekHeader(weekIndex, week.weekName);
+                        if(week.services) {
+                           week.services.forEach(service => scheduleBody.appendChild(createServiceRow(weekIndex, service, disabledState)));
                         }
                     });
                 } else {
-                    console.log("Carregando dados padrão para:", months[month], year);
-                    // Renderização padrão (sem dados salvos)
                     const firstDay = new Date(year, month, 1);
                     const daysInMonth = new Date(year, month + 1, 0).getDate();
                     const firstDayOfWeek = firstDay.getDay();
@@ -967,12 +884,9 @@
                                 
                                 let serviceData = {
                                     date: date.toISOString().split('T')[0],
-                                    day: dayNames[dayOfWeek].toUpperCase(), 
-                                    type,
+                                    day: dayNames[dayOfWeek].toUpperCase(), type,
                                     info: '',
-                                    portaria: 'A DEFINIR / A DEFINIR', 
-                                    direcao: 'A DEFINIR', 
-                                    preleitor: 'A DEFINIR'
+                                    portaria: 'A DEFINIR', direcao: 'A DEFINIR', preleitor: 'A DEFINIR'
                                 };
                                 
                                 if (month === 9 && octoberData[weekIndex] && octoberData[weekIndex][dayOfWeek]) {
@@ -993,94 +907,184 @@
                     }
                 }
                 
-                // Configura eventos
-                setupEventListeners();
-                updatePrintValues();
-            }
-
-            function setupEventListeners() {
-                // Event listeners para os elementos dinâmicos
+                // --- ADICIONAR EVENT LISTENERS DINÂMICOS ---
                 document.querySelectorAll('.date-input').forEach(i => i.addEventListener('change', (e) => {
                     const cell = document.getElementById(`day-cell-${e.target.dataset.rowId}`);
                     const date = new Date(e.target.value + 'T00:00:00');
                     cell.textContent = dayNames[date.getDay()].toUpperCase();
-                    updatePrintValues();
+                }));
+                document.querySelectorAll('.add-culto-btn').forEach(b => b.addEventListener('click', (e) => {
+                    currentWeekForModal = e.currentTarget.dataset.weekNum;
+                    addCultoModal.style.display = 'flex';
+                }));
+                document.querySelectorAll('.remove-week-culto-btn').forEach(b => b.addEventListener('click', (e) => {
+                    currentWeekForModal = e.currentTarget.dataset.weekNum;
+                    const list = document.getElementById('remove-culto-list');
+                    list.innerHTML = '';
+                    scheduleBody.querySelectorAll(`tr[data-week-index="${currentWeekForModal}"]`).forEach(row => {
+                        const cells = row.querySelectorAll('td');
+                        list.innerHTML += `<label class="flex items-center gap-2"><input type="checkbox" value="${row.dataset.rowId}">${cells[2].querySelector('[data-type]').textContent} (${cells[0].querySelector('input').value})</label>`;
+                    });
+                    if (list.innerHTML === '') {
+                        list.innerHTML = '<p class="text-gray-500">Nenhum culto para remover nesta semana.</p>';
+                    }
+                    removeCultoModal.style.display = 'flex';
                 }));
                 
                 document.querySelectorAll('select.auto-size-select').forEach(select => {
                     autoSizeSelect(select);
-                    select.addEventListener('change', () => {
-                        autoSizeSelect(select);
-                        updatePrintValues();
+                    select.addEventListener('change', () => autoSizeSelect(select));
+                });
+
+                document.querySelectorAll('.edit-info-btn').forEach(btn => {
+                    btn.addEventListener('click', onEditInfoClick);
+                });
+                
+                document.querySelectorAll('select[data-role="preleitor"]').forEach(select => {
+                    select.addEventListener('focus', () => {
+                        select.dataset.previousValue = select.value;
+                    });
+                    select.addEventListener('change', (e) => {
+                        const currentSelect = e.target;
+                        if (currentSelect.value === '__outro__') {
+                            const newName = prompt("Digite o nome do novo preleitor:");
+
+                            if (newName && newName.trim() !== '') {
+                                const trimmedName = newName.trim();
+                                if (!staffNames.includes(trimmedName)) {
+                                    staffNames.push(trimmedName);
+                                    staffNames.sort();
+                                    
+                                    document.querySelectorAll('select').forEach(s => {
+                                        if (s.dataset.role === 'preleitor' || s.dataset.role === 'portaria' || s.dataset.role === 'direcao') {
+                                             const newOption = new Option(trimmedName, trimmedName);
+                                             if (s.querySelector('option[value="__outro__"]')) {
+                                                s.add(newOption, s.options[s.options.length - 2]); // Antes de "Adicionar" e "Deletar"
+                                             } else {
+                                                s.add(newOption);
+                                                // Re-sort options se não for preleitor
+                                                if (s.dataset.role !== 'preleitor') {
+                                                    Array.from(s.options)
+                                                        .sort((a, b) => a.text.localeCompare(b.text))
+                                                        .forEach(option => s.add(option));
+                                                }
+                                             }
+                                        }
+                                    });
+                                }
+                                currentSelect.value = trimmedName;
+                                autoSizeSelect(currentSelect);
+                            } else {
+                                currentSelect.value = currentSelect.dataset.previousValue || 'A DEFINIR';
+                                autoSizeSelect(currentSelect);
+                            }
+                        } else if (currentSelect.value === '__deletar__') {
+                            const nameToDelete = prompt("Digite o nome EXATO do preleitor que deseja deletar:");
+                
+                            if (!nameToDelete || nameToDelete.trim() === '') {
+                                currentSelect.value = currentSelect.dataset.previousValue || 'A DEFINIR';
+                                autoSizeSelect(currentSelect);
+                                return;
+                            }
+                            
+                            const trimmedName = nameToDelete.trim();
+                            
+                            if (trimmedName === 'A DEFINIR') {
+                                alert("Você não pode deletar a opção 'A DEFINIR'.");
+                                currentSelect.value = currentSelect.dataset.previousValue || 'A DEFINIR';
+                                autoSizeSelect(currentSelect);
+                                return;
+                            }
+                            
+                            if (originalStaffNames.includes(trimmedName)) {
+                                alert("Você não pode deletar um nome da lista original.");
+                                currentSelect.value = currentSelect.dataset.previousValue || 'A DEFINIR';
+                                autoSizeSelect(currentSelect);
+                                return;
+                            }
+                            
+                            const index = staffNames.indexOf(trimmedName);
+                            if (index > -1) {
+                                staffNames.splice(index, 1); // Remove from master list
+                                
+                                document.querySelectorAll('select[data-role="portaria"], select[data-role="direcao"], select[data-role="preleitor"]').forEach(s => {
+                                    const optionToRemove = s.querySelector(`option[value="${trimmedName}"]`);
+                                    if (optionToRemove) {
+                                        s.remove(optionToRemove.index);
+                                    }
+                                });
+                                
+                                alert(`"${trimmedName}" foi removido com sucesso.`);
+                                currentSelect.value = 'A DEFINIR';
+                                autoSizeSelect(currentSelect);
+                            } else {
+                                alert(`Nome "${trimmedName}" não encontrado na lista de nomes cadastrados.`);
+                                currentSelect.value = currentSelect.dataset.previousValue || 'A DEFINIR';
+                                autoSizeSelect(currentSelect);
+                            }
+                        }
                     });
                 });
             }
 
-            function autoSizeSelect(element) {
-                if (!element) return;
-                const selectedOption = element.options[element.selectedIndex];
-                textWidthHelper.style.font = window.getComputedStyle(element).font;
-                textWidthHelper.textContent = selectedOption.text;
-                element.style.width = `${textWidthHelper.scrollWidth + 10}px`;
-            }
-
             // --- INICIALIZAÇÃO DA PÁGINA ---
             async function initialize() {
-                console.log("Inicializando aplicação...");
-                
-                // Inicializa Firebase
-                const firebaseConnected = await initializeFirebase();
-                if (!firebaseConnected) {
-                    console.warn("Firebase não conectado, usando modo offline");
-                }
-
-                // Configura interface
                 checkAuth();
                 const today = new Date();
                 const currentMonth = today.getMonth();
                 const currentYear = today.getFullYear();
 
-                // Preenche meses
                 months.forEach((m, i) => monthSelect.innerHTML += `<option value="${i}">${m}</option>`);
                 monthSelect.value = currentMonth;
                 yearInput.value = currentYear;
                 
-                // Tenta carregar dados salvos
+                await authReady; // Espera a autenticação do Firebase
+                
                 const scheduleId = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
                 let savedData = null;
 
-                if (firebaseConnected) {
+                if (schedulesCollection) {
                     try {
-                        const docSnap = await getDoc(doc(db, 'schedules', scheduleId));
+                        const docRef = doc(schedulesCollection, scheduleId);
+                        const docSnap = await getDoc(docRef);
                         if (docSnap.exists()) {
                             savedData = docSnap.data();
-                            console.log("Dados carregados do Firebase:", savedData);
-                        } else {
-                            console.log("Nenhum dado salvo encontrado para o mês atual");
                         }
                     } catch (error) {
-                        console.error("Erro ao carregar dados:", error);
+                        console.error("Erro ao carregar escala do mês atual:", error);
                     }
                 }
 
-                // Renderiza escala
-                renderSchedule(currentYear, currentMonth, savedData);
+                renderSchedule(currentYear, currentMonth, savedData); 
+                setupModalEvents();
                 
-                // Configura eventos de mudança de mês/ano
-                monthSelect.addEventListener('change', () => {
-                    renderSchedule(parseInt(yearInput.value), parseInt(monthSelect.value));
-                });
-                
-                yearInput.addEventListener('change', () => {
-                    renderSchedule(parseInt(yearInput.value), parseInt(monthSelect.value));
-                });
+                const update = async () => {
+                    const newYear = parseInt(yearInput.value);
+                    const newMonth = parseInt(monthSelect.value);
+                    const scheduleId = `${newYear}-${String(newMonth + 1).padStart(2, '0')}`;
+                    let savedData = null;
 
-                console.log("Aplicação inicializada com sucesso");
+                    if (schedulesCollection) {
+                        try {
+                            const docRef = doc(schedulesCollection, scheduleId);
+                            const docSnap = await getDoc(docRef);
+                            if (docSnap.exists()) {
+                                savedData = docSnap.data();
+                            }
+                        } catch (error) {
+                            console.error("Erro ao carregar escala selecionada:", error);
+                        }
+                    }
+                    renderSchedule(newYear, newMonth, savedData);
+                };
+                
+                monthSelect.addEventListener('change', update);
+                yearInput.addEventListener('change', update);
             }
 
-            // Inicia a aplicação
             initialize();
         });
     </script>
 </body>
 </html>
+
